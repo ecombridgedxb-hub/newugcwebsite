@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ValueProp from './components/ValueProp';
+import About from './components/About';
 import HowItWorks from './components/HowItWorks';
-import BrandPartners from './components/BrandPartners';
-import AIFeature from './components/AIFeature';
+import Criteria from './components/Criteria';
+import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import CreatorModal from './components/CreatorModal';
 import AdminDashboard from './components/AdminDashboard';
@@ -30,15 +30,15 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen font-body">
       <Navbar onOpenModal={openModal} />
-      
+
       <main>
         <Hero onOpenModal={openModal} />
-        <ValueProp />
+        <About />
         <HowItWorks />
-        <BrandPartners />
-        <AIFeature />
+        <Criteria />
+        <FAQ />
       </main>
 
       <Footer />
@@ -49,8 +49,5 @@ const App: React.FC = () => {
     </div>
   );
 };
-
-// Simple import for AnimatePresence since it was used but not imported in the original App.tsx snippet provided
-import { AnimatePresence } from 'framer-motion';
 
 export default App;

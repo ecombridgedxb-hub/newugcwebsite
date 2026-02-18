@@ -12,7 +12,7 @@ const HowItWorks: React.FC = () => {
     {
       icon: <Package size={36} />,
       title: "Curated Drops",
-      desc: "Receive bespoke products from luxury partners delivered to your door in the UAE."
+      desc: "Receive bespoke products from quality brands delivered to your door in the UAE.",
     },
     {
       icon: <Share2 size={36} />,
@@ -24,10 +24,10 @@ const HowItWorks: React.FC = () => {
   return (
     <section id="how-it-works" className="py-32 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-        <h2 className="text-4xl lg:text-5xl font-extrabold text-heading mb-24 tracking-tight">The Modern Process</h2>
+        <h2 className="text-4xl lg:text-5xl font-extrabold text-heading mb-24 tracking-tight">How It Works</h2>
         <div className="grid md:grid-cols-3 gap-20">
           {steps.map((step, idx) => (
-            <motion.div 
+            <motion.div
               key={idx}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
