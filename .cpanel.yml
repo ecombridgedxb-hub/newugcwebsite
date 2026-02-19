@@ -1,8 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$USER/public_html/
-    # Copy build artifacts from dist folder to public_html
+    - export DEPLOYPATH=/home/zoq5jjekub4u/public_html
     - /bin/cp -R dist/* $DEPLOYPATH
-    # Ensure index.html is readable by the web server
     - /bin/chmod 644 $DEPLOYPATH/index.html
