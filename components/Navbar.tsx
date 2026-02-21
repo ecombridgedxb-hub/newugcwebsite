@@ -23,11 +23,14 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenModal }) => {
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <div className="flex items-center">
-            <span className="text-xl font-extrabold tracking-tight text-heading flex flex-col leading-none">
-              <span>Curated<span className="text-primary">Circle</span></span>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl">
+              CC
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-xl font-extrabold tracking-tight text-heading">CuratedCircle</span>
               <span className="text-[10px] text-body font-medium tracking-wide mt-0.5">by EcomBridge</span>
-            </span>
+            </div>
           </div>
 
           {/* Desktop Nav Links */}

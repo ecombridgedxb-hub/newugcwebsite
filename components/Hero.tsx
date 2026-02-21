@@ -22,7 +22,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
                 Invite-Only Community
               </div>
               <h1 className="text-5xl lg:text-7xl font-extrabold text-heading leading-[1.1] mb-8 tracking-tight">
-                Collaborate with <br /><span className="text-primary">Real Brands.</span> Not Paid Hype.
+                Collaborate with Real Brands. Not Paid Hype.
               </h1>
               <p className="text-lg lg:text-xl text-body mb-12 leading-relaxed max-w-lg">
                 CuratedCircle is a UAE-based, invite-only micro-influencer community operated by EcomBridge. Receive curated products and create authentic UGC — no forced scripts, no mass campaigns.

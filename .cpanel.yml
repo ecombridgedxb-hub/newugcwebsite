@@ -1,12 +1,9 @@
----
 deployment:
   tasks:
     - export DEPLOYPATH=/home/zoq5jjekub4u/public_html
-    # Force copy (-f) all files recursively (-R) from dist to public_html
-    - /bin/cp -Run dist/* $DEPLOYPATH
-    # Explicitly force remove old index.html if it exists to ensure clean slate
-    - /bin/rm -f $DEPLOYPATH/index.html
-    # Copy the new index.html specifically
-    - /bin/cp -f dist/index.html $DEPLOYPATH/
-    # Ensure correct permissions
+    # Copy all files from dist to public_html, overwriting existing ones (-f)
+    - /bin/cp -rf dist/* $DEPLOYPATH/
+    # Ensure index.html is exactly what we built
+    - /bin/cp -f dist/index.html $DEPLOYPATH/index.html
+    # Set permissions
     - /bin/chmod 644 $DEPLOYPATH/index.html
