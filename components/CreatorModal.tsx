@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { X, ChevronRight, ChevronLeft, CheckCircle2, Upload, FileText, Camera, Video, DollarSign, PenTool, Globe, Calendar, Briefcase, MapPin, Heart, Shield, Info } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, CheckCircle2, Upload, FileText, Instagram, Youtube, Facebook, Twitter, Music2, Globe, Camera, Laptop, Clock, MapPin, ShieldCheck, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CreatorModalProps {
@@ -7,392 +8,771 @@ interface CreatorModalProps {
   onClose: () => void;
 }
 
-const InputField = ({ label, name, type = "text", placeholder = "", required = false, formData, handleInputChange, errors }: any) => (
-  <div>
-    <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-2">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      type={type}
-      name={name}
-      value={formData[name] || ''}
-      onChange={handleInputChange}
-      onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
-      placeholder={placeholder}
-      className={`w-full p-4 bg-[#F9FAFB] border rounded-2xl outline-none focus:bg-white focus:border-primary/20 transition-all ${errors && errors[name] ? 'border-red-500' : 'border-transparent'}`}
-    />
-    {errors && errors[name] && <p className="text-xs text-red-500 mt-1">{errors[name]}</p>}
-  </div>
-);
-
-const SelectField = ({ label, name, options, formData, handleInputChange }: any) => (
-  <div>
-    <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-2">{label}</label>
-    <select
-      name={name}
-      value={formData[name] || ''}
-      onChange={handleInputChange}
-      className="w-full p-4 bg-[#F9FAFB] border border-transparent rounded-2xl outline-none focus:bg-white"
-    >
-      <option value="">Select...</option>
-      {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
-    </select>
-  </div>
-);
+type SocialPlatform = 'Instagram' | 'TikTok' | 'YouTube' | 'Facebook' | 'X' | 'Pinterest' | 'Snapchat';
 
 const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
-  const totalSteps = 6;
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rejectedGifted, setRejectedGifted] = useState(false);
-
-  // 🚨 GOOGLE WEB APP URL
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4vdXONgYh5gVdlQGArvov1Goa5ILiwRPQzPm9JbG31hXM4eE8aLvz3rizcgOFWreY/exec";
-
+  const [isRejected, setIsRejected] = useState(false);
+  
   const [formData, setFormData] = useState({
-    // Step 1: Personal & Gifted Check
     firstName: '',
     lastName: '',
     age: '',
     gender: '',
-    residence: 'Dubai',
+    residence: '',
     email: '',
     phone: '',
-    acceptGifted: '',
+    acceptsGifted: '' as 'Yes' | 'No' | '',
+    
+    // Licenses
+    hasLicense: '' as 'Yes' | 'No' | 'In Progress' | '',
+    licenseFile: null as File | null,
+    emiratesIdFile: null as File | null,
+    visaFile: null as File | null,
 
-    // Step 2: Licenses & IDs
-    licenseStatus: '',
-    licenseBase64: '',
-    emiratesIdBase64: '',
-    visaBase64: '',
+    // Social
+    socialHandles: {} as Record<SocialPlatform, string>,
+    portfolioLink: '',
+    languages: [] as string[],
+    otherLanguage: '',
 
-    // Step 3: Social & Portfolio
-    socialPlatforms: [] as string[],
-    socialLinks: {} as { [key: string]: string },
-    portfolio: '',
-    contentLanguages: [] as string[],
-
-    // Step 4: Content Expertise
-    interests: [] as string[],
+    // Expertise
+    interestFields: [] as string[],
     consistency: '',
-    editing: '',
+    editingCapabilities: '',
     equipment: '',
 
-    // Step 5: Collaboration
-    availabilityOnSite: '',
+    // Logistics
+    onSiteAvailability: '',
     tat: '',
     exclusivity: '',
 
-    // Step 6: Verification
-    legalConsent: false
+    // Final
+    finalAgreement: false
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [activeSocialInput, setActiveSocialInput] = useState<SocialPlatform | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
-    const checked = (e.target as HTMLInputElement).checked;
-
-    if (['contentLanguages', 'interests', 'socialPlatforms'].includes(name)) {
-      setFormData(prev => {
-        const list = prev[name as keyof typeof prev] as string[];
-        if (checked) return { ...prev, [name]: [...list, value] };
-        else return { ...prev, [name]: list.filter(item => item !== value) };
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    
+    setFormData(prev => ({ ...prev, [name]: val }));
+    
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrs = { ...prev };
+        delete newErrs[name];
+        return newErrs;
       });
-      return;
     }
+  };
 
-    if (type === 'checkbox' && name === 'legalConsent') {
-      setFormData(prev => ({ ...prev, [name]: checked }));
-      return;
+  const handleFileChange = (name: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFormData(prev => ({ ...prev, [name]: file }));
+      
+      setErrors(prev => {
+        const newErrs = { ...prev };
+        delete newErrs[name];
+        return newErrs;
+      });
     }
+  };
 
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => {
-      const newErrs = { ...prev };
-      delete newErrs[name];
-      return newErrs;
+  const toggleInterestField = (field: string) => {
+    setFormData(prev => {
+      const current = [...prev.interestFields];
+      if (current.includes(field)) {
+        return { ...prev, interestFields: current.filter(f => f !== field) };
+      } else if (current.length < 3) {
+        return { ...prev, interestFields: [...current, field] };
+      }
+      return prev;
     });
   };
 
-  const handleSocialLinkChange = (platform: string, value: string) => {
+  const toggleLanguage = (lang: string) => {
+    setFormData(prev => {
+      const current = [...prev.languages];
+      if (current.includes(lang)) {
+        return { ...prev, languages: current.filter(l => l !== lang) };
+      } else {
+        return { ...prev, languages: [...current, lang] };
+      }
+    });
+  };
+
+  const handleSocialHandleChange = (platform: SocialPlatform, value: string) => {
     setFormData(prev => ({
       ...prev,
-      socialLinks: { ...prev.socialLinks, [platform]: value }
+      socialHandles: { ...prev.socialHandles, [platform]: value }
     }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, [field]: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const validateStep = (currentStep: number) => {
+  const validateStep = () => {
     const newErrors: { [key: string]: string } = {};
-
-    if (currentStep === 1) {
-      if (!formData.firstName) newErrors.firstName = "Required";
-      if (!formData.lastName) newErrors.lastName = "Required";
-      if (!formData.age || parseInt(formData.age) < 18) newErrors.age = "18+ only";
-      if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid";
-      if (!formData.phone) newErrors.phone = "Required";
-      if (!formData.acceptGifted) newErrors.acceptGifted = "Selection required";
-    }
-
-    if (currentStep === 6 && !formData.legalConsent) {
-      newErrors.legalConsent = "Required";
+    
+    if (step === 1) {
+      if (!formData.firstName) newErrors.firstName = "First name is required";
+      if (!formData.lastName) newErrors.lastName = "Last name is required";
+      if (!formData.age || parseInt(formData.age) < 18) newErrors.age = "Must be 18+ to continue";
+      if (!formData.gender) newErrors.gender = "Required";
+      if (!formData.residence) newErrors.residence = "Required";
+      if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Valid email required";
+      if (!formData.phone) newErrors.phone = "Phone number required";
+      if (!formData.acceptsGifted) newErrors.acceptsGifted = "Please select an option";
+    } else if (step === 2) {
+      if (!formData.hasLicense) newErrors.hasLicense = "Required";
+      if (formData.hasLicense === 'Yes' && !formData.licenseFile) newErrors.licenseFile = "License upload required";
+      if (!formData.emiratesIdFile) newErrors.emiratesIdFile = "Emirates ID/Passport required";
+      if (!formData.visaFile) newErrors.visaFile = "Visa upload required";
+    } else if (step === 3) {
+      if (Object.keys(formData.socialHandles).length === 0) newErrors.social = "At least one social handle required";
+      if (!formData.portfolioLink) newErrors.portfolioLink = "Portfolio link required";
+      if (formData.languages.length === 0) newErrors.languages = "Select at least one language";
+    } else if (step === 4) {
+      if (formData.interestFields.length === 0) newErrors.interestFields = "Select at least one field";
+      if (!formData.consistency) newErrors.consistency = "Required";
+      if (!formData.editingCapabilities) newErrors.editingCapabilities = "Required";
+      if (!formData.equipment) newErrors.equipment = "Required";
+    } else if (step === 5) {
+      if (!formData.onSiteAvailability) newErrors.onSiteAvailability = "Required";
+      if (!formData.tat) newErrors.tat = "Required";
+    } else if (step === 6) {
+      if (!formData.finalAgreement) newErrors.finalAgreement = "You must agree to continue";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const submitToGoogle = async (data: any) => {
-    if (!GOOGLE_SCRIPT_URL) return;
-    try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ ...data, submittedAt: new Date().toISOString() }),
-        mode: 'no-cors'
-      });
-    } catch (e) {
-      console.error("Submission error", e);
-    }
-  };
-
-  const nextStep = async () => {
-    if (validateStep(step)) {
-      if (step === 1 && formData.acceptGifted === 'No') {
-        setIsSubmitting(true);
-        await submitToGoogle(formData);
-        setIsSubmitting(false);
-        setRejectedGifted(true);
-        setIsSubmitted(true);
+  const nextStep = () => {
+    if (validateStep()) {
+      if (step === 1 && formData.acceptsGifted === 'No') {
+        setIsRejected(true);
       } else {
         setStep(prev => prev + 1);
       }
     }
   };
 
-  const handleSubmit = async () => {
-    if (validateStep(step)) {
+  const prevStep = () => setStep(prev => prev - 1);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateStep()) {
       setIsSubmitting(true);
-      await submitToGoogle(formData);
-      setIsSubmitting(false);
-      setIsSubmitted(true);
+      setSubmitError(null);
+
+      try {
+        const formDataToSend = new FormData();
+        
+        // Append all text fields
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key === 'socialHandles') {
+            formDataToSend.append(key, JSON.stringify(value));
+          } else if (Array.isArray(value)) {
+            formDataToSend.append(key, value.join(', '));
+          } else if (value instanceof File) {
+            formDataToSend.append(key, value);
+          } else if (typeof value === 'boolean') {
+            formDataToSend.append(key, value.toString());
+          } else if (value !== null) {
+            formDataToSend.append(key, value as string);
+          }
+        });
+
+        const response = await fetch('/api/applications', {
+          method: 'POST',
+          body: formDataToSend,
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          setIsSubmitted(true);
+        } else {
+          throw new Error(result.message || 'Failed to submit application');
+        }
+      } catch (error: any) {
+        console.error('Submission error:', error);
+        setSubmitError(error.message || 'An unexpected error occurred. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   if (!isOpen) return null;
 
+  const emirates = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
+  const interestFields = [
+    'Beauty & Skincare', 'Fitness & Wellness', 'Tech & Gaming', 'Fashion', 
+    'Food & Beverage', 'Parenting/Kids', 'Travel', 'Home & Lifestyle', 
+    'Sports', 'Cozy Hobbies'
+  ];
+
+  const socialPlatforms: { name: SocialPlatform; icon: any; color: string }[] = [
+    { name: 'Instagram', icon: Instagram, color: 'text-pink-600' },
+    { name: 'TikTok', icon: Music2, color: 'text-black' },
+    { name: 'YouTube', icon: Youtube, color: 'text-red-600' },
+    { name: 'Facebook', icon: Facebook, color: 'text-blue-600' },
+    { name: 'X', icon: Twitter, color: 'text-gray-900' },
+    { name: 'Pinterest', icon: Globe, color: 'text-red-700' },
+    { name: 'Snapchat', icon: Globe, color: 'text-yellow-500' },
+  ];
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-[#0F172A]/60 backdrop-blur-md" />
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-md"
+      ></motion.div>
 
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-        <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-heading z-20">
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="relative bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden h-[85vh] flex flex-col"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-8 right-8 p-2 text-gray-400 hover:text-heading transition-colors z-20"
+        >
           <X size={24} />
         </button>
 
-        {!isSubmitted ? (
+        {!isSubmitted && !isRejected ? (
           <>
-            <div className="px-8 pt-8 pb-4 border-b border-gray-100 bg-white z-10">
-              <div className="flex justify-between items-center mb-4">
+            <div className="p-10 pb-6">
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="px-3 py-1 bg-accent text-primary text-[10px] font-bold uppercase tracking-widest rounded-full">Step {step} of 6</span>
                 <h3 className="text-2xl font-extrabold text-heading tracking-tight">Creator Registration</h3>
-                <span className="text-xs font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">Step {step} of {totalSteps}</span>
               </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                <motion.div className="h-full bg-primary" initial={{ width: 0 }} animate={{ width: `${(step / totalSteps) * 100}%` }} />
+              <p className="text-body text-sm font-medium mb-8">Join the UAE's most exclusive UGC network.</p>
+              
+              <div className="relative h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <motion.div 
+                  className="absolute top-0 left-0 h-full bg-primary"
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${(step / 6) * 100}%` }}
+                  transition={{ type: 'spring', stiffness: 50 }}
+                ></motion.div>
               </div>
             </div>
 
-            <div className="flex-1 px-8 py-6 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 px-10 pb-8 overflow-y-auto custom-scrollbar">
               <AnimatePresence mode="wait">
                 {step === 1 && (
-                  <motion.div key="1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                    <h4 className="text-lg font-bold text-primary flex items-center"><Shield className="w-5 h-5 mr-2" /> Personal & Legal</h4>
+                  <motion.div 
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
                     <div className="grid grid-cols-2 gap-4">
-                      <InputField label="First Name" name="firstName" required formData={formData} handleInputChange={handleInputChange} errors={errors} />
-                      <InputField label="Last Name" name="lastName" required formData={formData} handleInputChange={handleInputChange} errors={errors} />
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">First Name</label>
+                        <input 
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none transition-all ${errors.firstName ? 'border-red-500' : 'border-transparent focus:bg-white focus:border-primary/20'}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Last Name</label>
+                        <input 
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                          className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none transition-all ${errors.lastName ? 'border-red-500' : 'border-transparent focus:bg-white focus:border-primary/20'}`}
+                        />
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <InputField label="Age" name="age" type="number" required formData={formData} handleInputChange={handleInputChange} errors={errors} />
-                      <SelectField label="Gender" name="gender" options={['Male', 'Female', 'Prefer not to say']} formData={formData} handleInputChange={handleInputChange} />
-                    </div>
-                    <SelectField label="Primary Residence" name="residence" options={['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah']} formData={formData} handleInputChange={handleInputChange} />
-                    <InputField label="Email Address" name="email" type="email" required formData={formData} handleInputChange={handleInputChange} errors={errors} />
-                    <InputField label="Phone / WhatsApp" name="phone" required formData={formData} handleInputChange={handleInputChange} errors={errors} />
 
-                    <div className="p-4 bg-accent/10 rounded-2xl border border-primary/10">
-                      <p className="text-sm font-bold text-heading mb-3">We are currently focused on GIFTED COLLABORATIONS (products as payment). Do you operate within this agreement?</p>
-                      <div className="flex gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Age</label>
+                        <input 
+                          name="age"
+                          type="number"
+                          value={formData.age}
+                          onChange={handleInputChange}
+                          placeholder="18+"
+                          className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none ${errors.age ? 'border-red-500' : 'border-transparent focus:bg-white'}`}
+                        />
+                        {errors.age && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.age}</p>}
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Gender</label>
+                        <select 
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleInputChange}
+                          className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none ${errors.gender ? 'border-red-500' : 'border-transparent focus:bg-white'}`}
+                        >
+                          <option value="">Select</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Primary Residence (Emirate)</label>
+                      <select 
+                        name="residence"
+                        value={formData.residence}
+                        onChange={handleInputChange}
+                        className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none transition-all ${errors.residence ? 'border-red-500' : 'border-transparent focus:bg-white focus:border-primary/20'}`}
+                      >
+                        <option value="">Select Emirate</option>
+                        {emirates.map(emirate => (
+                          <option key={emirate} value={emirate}>{emirate}</option>
+                        ))}
+                      </select>
+                      {errors.residence && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.residence}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Email Address</label>
+                        <input 
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none ${errors.email ? 'border-red-500' : 'border-transparent focus:bg-white'}`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Phone / WhatsApp</label>
+                        <input 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="+971"
+                          className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none ${errors.phone ? 'border-red-500' : 'border-transparent focus:bg-white'}`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-accent/20 rounded-2xl border border-primary/10">
+                      <label className="block text-xs font-bold text-heading mb-3 leading-tight">
+                        We focus on UGC influencers that accept GIFTED COLLABORATIONS (products as payment) only. Do you operate within this agreement?
+                      </label>
+                      <div className="flex space-x-4">
                         {['Yes', 'No'].map(opt => (
-                          <label key={opt} className={`flex-1 flex items-center justify-center p-3 rounded-xl cursor-pointer border transition-all ${formData.acceptGifted === opt ? 'bg-primary border-primary text-white font-bold' : 'bg-white border-gray-200 text-body'}`}>
-                            <input type="radio" name="acceptGifted" value={opt} checked={formData.acceptGifted === opt} onChange={handleInputChange} className="hidden" />
+                          <button
+                            key={opt}
+                            onClick={() => setFormData(prev => ({ ...prev, acceptsGifted: opt as any }))}
+                            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all border ${formData.acceptsGifted === opt ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white text-body border-gray-100 hover:border-primary/20'}`}
+                          >
                             {opt}
-                          </label>
+                          </button>
                         ))}
                       </div>
-                      {errors.acceptGifted && <p className="text-red-500 text-xs mt-2 font-bold">{errors.acceptGifted}</p>}
+                      {errors.acceptsGifted && <p className="text-[10px] text-red-500 mt-2 font-bold">{errors.acceptsGifted}</p>}
                     </div>
                   </motion.div>
                 )}
 
                 {step === 2 && (
-                  <motion.div key="2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                    <h4 className="text-lg font-bold text-primary flex items-center"><FileText className="w-5 h-5 mr-2" /> Licenses & IDs</h4>
-                    <SelectField label="UAE Media License" name="licenseStatus" options={['Yes (NMCI/MCI)', 'No', 'In Progress']} formData={formData} handleInputChange={handleInputChange} />
+                  <motion.div 
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-3">UAE Content Creator/Media License</label>
+                      <div className="flex space-x-3 mb-6">
+                        {['Yes', 'No', 'In Progress'].map(opt => (
+                          <button
+                            key={opt}
+                            onClick={() => setFormData(prev => ({ ...prev, hasLicense: opt as any }))}
+                            className={`flex-1 py-3 rounded-xl font-bold text-xs transition-all border ${formData.hasLicense === opt ? 'bg-primary text-white border-primary' : 'bg-[#F9FAFB] text-body border-transparent hover:border-primary/20'}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {formData.hasLicense === 'Yes' && (
+                          <div>
+                            <label className="block text-[10px] font-bold text-body uppercase tracking-widest mb-2">Upload License Copy</label>
+                            <label className={`flex items-center p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${formData.licenseFile ? 'bg-accent/10 border-primary' : 'bg-[#F9FAFB] border-gray-200 hover:border-primary/20'}`}>
+                              <input type="file" className="hidden" onChange={(e) => handleFileChange('licenseFile', e)} />
+                              <Upload size={18} className="text-primary mr-3" />
+                              <span className="text-xs font-bold text-heading truncate">{formData.licenseFile ? formData.licenseFile.name : 'Click to upload license'}</span>
+                            </label>
+                          </div>
+                        )}
 
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-2">Upload License (If Yes)</label>
-                        <input type="file" onChange={(e) => handleFileUpload(e, 'licenseBase64')} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-2">Emirates ID / Passport Copy</label>
-                        <input type="file" onChange={(e) => handleFileUpload(e, 'emiratesIdBase64')} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-2">Visa Copy</label>
-                        <input type="file" onChange={(e) => handleFileUpload(e, 'visaBase64')} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary" />
+                        <div>
+                          <label className="block text-[10px] font-bold text-body uppercase tracking-widest mb-2">Emirates ID / Passport Copy</label>
+                          <label className={`flex items-center p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${formData.emiratesIdFile ? 'bg-accent/10 border-primary' : 'bg-[#F9FAFB] border-gray-200 hover:border-primary/20'}`}>
+                            <input type="file" className="hidden" onChange={(e) => handleFileChange('emiratesIdFile', e)} />
+                            <Upload size={18} className="text-primary mr-3" />
+                            <span className="text-xs font-bold text-heading truncate">{formData.emiratesIdFile ? formData.emiratesIdFile.name : 'Click to upload ID/Passport'}</span>
+                          </label>
+                          {errors.emiratesIdFile && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.emiratesIdFile}</p>}
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-body uppercase tracking-widest mb-2">Visa Upload</label>
+                          <label className={`flex items-center p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${formData.visaFile ? 'bg-accent/10 border-primary' : 'bg-[#F9FAFB] border-gray-200 hover:border-primary/20'}`}>
+                            <input type="file" className="hidden" onChange={(e) => handleFileChange('visaFile', e)} />
+                            <Upload size={18} className="text-primary mr-3" />
+                            <span className="text-xs font-bold text-heading truncate">{formData.visaFile ? formData.visaFile.name : 'Click to upload Visa'}</span>
+                          </label>
+                          {errors.visaFile && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.visaFile}</p>}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
                 )}
 
                 {step === 3 && (
-                  <motion.div key="3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                    <h4 className="text-lg font-bold text-primary flex items-center"><Globe className="w-5 h-5 mr-2" /> Social & Portfolio</h4>
+                  <motion.div 
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
                     <div>
-                      <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-3">Select Platforms</label>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {['Instagram', 'Tiktok', 'Youtube', 'Facebook', 'X', 'Pinterest', 'Snapchat'].map(p => (
-                          <label key={p} className={`px-4 py-2 rounded-full border text-sm cursor-pointer transition-all ${formData.socialPlatforms.includes(p) ? 'bg-heading text-white border-heading' : 'bg-white border-gray-200'}`}>
-                            <input type="checkbox" name="socialPlatforms" value={p} checked={formData.socialPlatforms.includes(p)} onChange={handleInputChange} className="hidden" />
-                            {p}
-                          </label>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-4">Social Media Handles</label>
+                      <div className="grid grid-cols-4 gap-3 mb-6">
+                        {socialPlatforms.map(platform => (
+                          <button
+                            key={platform.name}
+                            onClick={() => setActiveSocialInput(platform.name)}
+                            className={`flex flex-col items-center p-3 rounded-xl border transition-all ${formData.socialHandles[platform.name] ? 'bg-primary/5 border-primary' : 'bg-[#F9FAFB] border-transparent hover:border-primary/20'}`}
+                          >
+                            <platform.icon size={20} className={platform.color} />
+                            <span className="text-[9px] font-bold mt-2 uppercase tracking-tighter">{platform.name}</span>
+                            {formData.socialHandles[platform.name] && <div className="mt-1 w-1 h-1 bg-primary rounded-full"></div>}
+                          </button>
                         ))}
                       </div>
-                      {formData.socialPlatforms.map(p => (
-                        <div key={p} className="mb-3">
-                          <InputField
-                            label={`${p} Link`}
-                            name={`link_${p}`}
-                            placeholder={`Paste your ${p} profile link`}
-                            formData={{ [`link_${p}`]: formData.socialLinks[p] || '' }}
-                            handleInputChange={(e: any) => handleSocialLinkChange(p, e.target.value)}
+
+                      <AnimatePresence mode="wait">
+                        {activeSocialInput && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="p-4 bg-gray-50 rounded-xl border border-gray-100 mb-6"
+                          >
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-[10px] font-bold text-heading uppercase tracking-widest">{activeSocialInput} Link</span>
+                              <button onClick={() => setActiveSocialInput(null)} className="text-body hover:text-heading"><X size={14}/></button>
+                            </div>
+                            <input 
+                              autoFocus
+                              placeholder={`https://${activeSocialInput.toLowerCase()}.com/yourname`}
+                              value={formData.socialHandles[activeSocialInput] || ''}
+                              onChange={(e) => handleSocialHandleChange(activeSocialInput, e.target.value)}
+                              className="w-full p-3 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-primary/40"
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                      {errors.social && <p className="text-[10px] text-red-500 mb-4 font-bold">{errors.social}</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Portfolio / Media Kit Link</label>
+                      <input 
+                        name="portfolioLink"
+                        value={formData.portfolioLink}
+                        onChange={handleInputChange}
+                        placeholder="Google Drive, Canva, or Website link"
+                        className={`w-full p-3.5 bg-[#F9FAFB] border rounded-xl outline-none ${errors.portfolioLink ? 'border-red-500' : 'border-transparent focus:bg-white'}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-3">Primary Content Language(s)</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['English', 'Arabic', 'Both'].map(lang => (
+                          <button
+                            key={lang}
+                            onClick={() => toggleLanguage(lang)}
+                            className={`px-4 py-2 text-xs font-bold rounded-full border transition-all ${formData.languages.includes(lang) ? 'bg-primary text-white border-primary' : 'bg-[#F9FAFB] text-body border-transparent hover:border-primary/20'}`}
+                          >
+                            {lang}
+                          </button>
+                        ))}
+                        <div className="flex-1 min-w-[120px]">
+                          <input 
+                            name="otherLanguage"
+                            value={formData.otherLanguage}
+                            onChange={handleInputChange}
+                            placeholder="Other..."
+                            className="w-full px-4 py-2 bg-[#F9FAFB] border border-transparent rounded-full text-xs outline-none focus:bg-white focus:border-primary/20"
                           />
                         </div>
-                      ))}
-                    </div>
-                    <InputField label="Portfolio / Media Kit Link" name="portfolio" placeholder="Google Drive, Canva, or Website" formData={formData} handleInputChange={handleInputChange} />
-                    <div>
-                      <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-2">Primary Languages</label>
-                      <div className="flex gap-3">
-                        {['English', 'Arabic', 'Both'].map(l => (
-                          <label key={l} className={`flex-1 flex items-center justify-center p-3 rounded-xl cursor-pointer border transition-all ${formData.contentLanguages.includes(l) ? 'bg-accent/20 border-primary text-primary font-bold' : 'border-gray-200'}`}>
-                            <input type="checkbox" name="contentLanguages" value={l} checked={formData.contentLanguages.includes(l)} onChange={handleInputChange} className="hidden" />
-                            {l}
-                          </label>
-                        ))}
                       </div>
+                      {errors.languages && <p className="text-[10px] text-red-500 mt-2 font-bold">{errors.languages}</p>}
                     </div>
                   </motion.div>
                 )}
 
                 {step === 4 && (
-                  <motion.div key="4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                    <h4 className="text-lg font-bold text-primary flex items-center"><Camera className="w-5 h-5 mr-2" /> Content Expertise</h4>
+                  <motion.div 
+                    key="step4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
                     <div>
-                      <label className="block text-xs font-bold text-heading uppercase tracking-widest mb-3">Top 3 Interest Fields</label>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-3">Top 3 Interest Fields (Select up to 3)</label>
                       <div className="grid grid-cols-2 gap-2">
-                        {['Beauty & Skincare', 'Fitness & Wellness', 'Tech & Gaming', 'Fashion', 'Food & Beverage', 'Parenting/Kids', 'Travel', 'Home & Lifestyle', 'Sports', 'Cozy Hobbies'].map(cat => (
-                          <label key={cat} className={`flex items-center space-x-2 p-3 rounded-xl cursor-pointer border ${formData.interests.includes(cat) ? 'bg-primary/5 border-primary' : 'bg-gray-50 border-transparent'}`}>
-                            <input type="checkbox" name="interests" value={cat} checked={formData.interests.includes(cat)} onChange={handleInputChange} className="accent-primary" />
-                            <span className="text-xs font-medium">{cat}</span>
-                          </label>
+                        {interestFields.map(field => (
+                          <button
+                            key={field}
+                            onClick={() => toggleInterestField(field)}
+                            className={`p-3 text-left text-[11px] font-bold rounded-xl border transition-all ${formData.interestFields.includes(field) ? 'bg-primary/5 border-primary text-primary' : 'bg-[#F9FAFB] text-body border-transparent hover:border-primary/20'}`}
+                          >
+                            {field}
+                          </button>
                         ))}
                       </div>
+                      {errors.interestFields && <p className="text-[10px] text-red-500 mt-2 font-bold">{errors.interestFields}</p>}
                     </div>
-                    <SelectField label="Posting Consistency" name="consistency" options={['Multiple times a week', 'Once a week', 'Once a month']} formData={formData} handleInputChange={handleInputChange} />
-                    <SelectField label="Editing Capabilities" name="editing" options={['I edit my own videos', 'I provide raw footage only']} formData={formData} handleInputChange={handleInputChange} />
-                    <InputField label="Primary Equipment Used" name="equipment" placeholder="e.g. iPhone 15 Pro, Sony ZV-1" formData={formData} handleInputChange={handleInputChange} />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Consistency</label>
+                        <select 
+                          name="consistency"
+                          value={formData.consistency}
+                          onChange={handleInputChange}
+                          className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl text-xs outline-none"
+                        >
+                          <option value="">Select</option>
+                          <option>Multiple times a week</option>
+                          <option>Once a week</option>
+                          <option>Once a month</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Editing</label>
+                        <select 
+                          name="editingCapabilities"
+                          value={formData.editingCapabilities}
+                          onChange={handleInputChange}
+                          className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl text-xs outline-none"
+                        >
+                          <option value="">Select</option>
+                          <option>I edit my own videos</option>
+                          <option>I provide raw footage only</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Primary Equipment</label>
+                      <input 
+                        name="equipment"
+                        value={formData.equipment}
+                        onChange={handleInputChange}
+                        placeholder="e.g., iPhone 15 Pro, Sony ZV-1"
+                        className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl text-xs outline-none focus:bg-white focus:border-primary/20"
+                      />
+                    </div>
                   </motion.div>
                 )}
 
                 {step === 5 && (
-                  <motion.div key="5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                    <h4 className="text-lg font-bold text-primary flex items-center"><Briefcase className="w-5 h-5 mr-2" /> Collaboration & Logistics</h4>
-                    <SelectField label="Available for On-Site Shoots?" name="availabilityOnSite" options={['Yes', 'No']} formData={formData} handleInputChange={handleInputChange} />
-                    <SelectField label="Turnaround Time (TAT)" name="tat" options={['48 Hours', '3-5 Days', '6-7 Days']} formData={formData} handleInputChange={handleInputChange} />
-                    <InputField label="Current Exclusivity (Brand Names)" name="exclusivity" placeholder="List existing brand ambassadorships..." formData={formData} handleInputChange={handleInputChange} />
+                  <motion.div 
+                    key="step5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-3">Availability for On-Site Shoots</label>
+                      <p className="text-[10px] text-body mb-3 font-medium">Are you available to film at malls, studios, or events in the UAE?</p>
+                      <div className="flex space-x-3">
+                        {['Yes', 'No'].map(opt => (
+                          <button
+                            key={opt}
+                            onClick={() => setFormData(prev => ({ ...prev, onSiteAvailability: opt }))}
+                            className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all border ${formData.onSiteAvailability === opt ? 'bg-primary text-white border-primary' : 'bg-[#F9FAFB] text-body border-transparent hover:border-primary/20'}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-3">Standard Turnaround Time (TAT)</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {['48 Hours', '3–5 Days', '6-7 Days'].map(opt => (
+                          <button
+                            key={opt}
+                            onClick={() => setFormData(prev => ({ ...prev, tat: opt }))}
+                            className={`py-3 rounded-xl font-bold text-[11px] transition-all border ${formData.tat === opt ? 'bg-primary text-white border-primary' : 'bg-[#F9FAFB] text-body border-transparent hover:border-primary/20'}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-heading uppercase tracking-widest mb-2">Current Exclusivity</label>
+                      <textarea 
+                        name="exclusivity"
+                        value={formData.exclusivity}
+                        onChange={handleInputChange}
+                        placeholder="Are you currently an exclusive ambassador for any specific brand? (If yes, please list)"
+                        className="w-full p-4 bg-[#F9FAFB] border border-transparent rounded-2xl text-xs outline-none focus:bg-white focus:border-primary/20 min-h-[100px] resize-none"
+                      />
+                    </div>
                   </motion.div>
                 )}
 
                 {step === 6 && (
-                  <motion.div key="6" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8 py-8">
-                    <div className="bg-accent/20 p-8 rounded-3xl border border-primary/20 text-center">
-                      <Shield className="w-12 h-12 text-primary mx-auto mb-4" />
-                      <h4 className="text-xl font-bold text-heading mb-4">Final Declaration</h4>
-                      <label className="flex items-start space-x-3 text-left p-4 bg-white/50 rounded-xl cursor-pointer">
-                        <input type="checkbox" name="legalConsent" checked={formData.legalConsent} onChange={handleInputChange} className="mt-1 w-5 h-5 accent-primary" />
-                        <span className="text-sm text-body font-medium leading-relaxed">
-                          I confirm that all information provided is accurate and I am legally allowed to work as a content creator in the UAE.
-                        </span>
+                  <motion.div 
+                    key="step6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-8 py-4"
+                  >
+                    <div className="p-8 bg-accent/20 rounded-[2rem] border border-primary/10 text-center">
+                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <ShieldCheck size={32} className="text-primary" />
+                      </div>
+                      <h4 className="text-xl font-extrabold text-heading mb-4">Final Verification</h4>
+                      <p className="text-xs text-body font-medium leading-relaxed mb-8">
+                        By submitting this application, you confirm that all information provided is accurate and you are legally allowed to work in the UAE.
+                      </p>
+                      
+                      <label className="flex items-center justify-center space-x-3 cursor-pointer group">
+                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.finalAgreement ? 'bg-primary border-primary' : 'border-gray-200 group-hover:border-primary/40'}`}>
+                          <input 
+                            type="checkbox" 
+                            className="hidden" 
+                            checked={formData.finalAgreement}
+                            onChange={(e) => setFormData(prev => ({ ...prev, finalAgreement: e.target.checked }))}
+                          />
+                          {formData.finalAgreement && <CheckCircle2 size={16} className="text-white" />}
+                        </div>
+                        <span className="text-sm font-bold text-heading">I Agree</span>
                       </label>
-                      {errors.legalConsent && <p className="text-red-500 font-bold mt-2 text-sm">{errors.legalConsent}</p>}
+                      {errors.finalAgreement && <p className="text-[10px] text-red-500 mt-2 font-bold">{errors.finalAgreement}</p>}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <div className="px-8 py-6 border-t border-gray-100 bg-white flex space-x-4">
-              {step > 1 && (
-                <button onClick={() => setStep(s => s - 1)} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gray-100 hover:bg-gray-200 text-heading transition-colors">
-                  <ChevronLeft size={24} />
-                </button>
+            <div className="p-10 pt-0 flex flex-col space-y-4">
+              {submitError && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center space-x-3 text-red-600">
+                  <AlertCircle size={18} />
+                  <span className="text-xs font-bold">{submitError}</span>
+                </div>
               )}
-
-              {step < totalSteps ? (
-                <button onClick={nextStep} disabled={isSubmitting} className="flex-1 h-14 bg-heading text-white font-bold rounded-2xl flex items-center justify-center space-x-2 active:scale-[0.98] transition-all hover:bg-heading/90">
-                  <span>{isSubmitting ? 'Processing...' : 'Next Step'}</span>
-                  <ChevronRight size={18} />
-                </button>
-              ) : (
-                <button onClick={handleSubmit} disabled={isSubmitting} className={`flex-1 h-14 font-bold rounded-2xl flex items-center justify-center space-x-2 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary text-white'}`}>
-                  {isSubmitting ? 'Sending Application...' : 'Submit Application'}
-                </button>
-              )}
+              <div className="flex space-x-4">
+                {step > 1 && (
+                  <button 
+                    onClick={prevStep}
+                    disabled={isSubmitting}
+                    className="flex items-center justify-center w-14 h-14 bg-gray-100 text-heading rounded-2xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                {step < 6 ? (
+                  <button 
+                    onClick={nextStep}
+                    className="flex-1 bg-heading text-white font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 active:scale-[0.98] transition-all"
+                  >
+                    <span>Next Step</span>
+                    <ChevronRight size={18} />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 disabled:opacity-70"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Submitting...</span>
+                      </div>
+                    ) : (
+                      <span>Submit Application</span>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </>
+        ) : isRejected ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 flex flex-col items-center justify-center p-16 text-center"
+          >
+            <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-10">
+              <AlertCircle size={48} className="text-red-500" />
+            </div>
+            <h3 className="text-3xl font-extrabold text-heading mb-6 tracking-tight">Application Status</h3>
+            <p className="text-body font-medium leading-relaxed mb-10 max-w-sm">
+              Thank you for your interest with CuratedCircle. If our business model changes, we will notify you for potential future onboarding.
+            </p>
+            <button 
+              onClick={onClose}
+              className="px-12 py-4 bg-heading text-white font-bold rounded-2xl hover:scale-105 transition-all"
+            >
+              Close
+            </button>
+          </motion.div>
         ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-            {rejectedGifted ? (
-              <>
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 text-gray-500">
-                  <Info size={40} />
-                </div>
-                <h3 className="text-2xl font-extrabold text-heading mb-4">Application Registered</h3>
-                <p className="text-body mb-8 max-w-sm">Thank you for your interest with CuratedCircle. If our business model changes, we will notify you for potential future onboarding.</p>
-              </>
-            ) : (
-              <>
-                <div className="w-24 h-24 bg-accent/40 rounded-full flex items-center justify-center mb-8 text-primary">
-                  <CheckCircle2 size={48} />
-                </div>
-                <h3 className="text-3xl font-extrabold text-heading mb-4">Application Received!</h3>
-                <p className="text-body mb-8 max-w-sm">Thank you for joining CuratedCircle. We will review your application and get back to you through your registered email.</p>
-              </>
-            )}
-            <button onClick={onClose} className="px-10 py-4 bg-heading text-white font-bold rounded-2xl hover:scale-105 transition-all">Close Window</button>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 flex flex-col items-center justify-center p-16 text-center"
+          >
+            <div className="w-24 h-24 bg-accent/40 rounded-full flex items-center justify-center mb-10">
+              <CheckCircle2 size={48} className="text-primary" />
+            </div>
+            <h3 className="text-3xl font-extrabold text-heading mb-6 tracking-tight">Application Sent</h3>
+            <p className="text-body font-medium leading-relaxed mb-10 max-w-sm">
+              Thank you for your interest in joining the CuratedCircle. We will review your application and get back to you through your registered email.
+            </p>
+            <button 
+              onClick={onClose}
+              className="px-12 py-4 bg-heading text-white font-bold rounded-2xl hover:scale-105 transition-all shadow-xl shadow-heading/20"
+            >
+              Back to Home
+            </button>
           </motion.div>
         )}
       </motion.div>
@@ -401,4 +781,3 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
 };
 
 export default CreatorModal;
-
