@@ -124,13 +124,38 @@ app.post("/api/applications", upload.fields([
 if (process.env.NODE_ENV !== "production") {
   const vite = await createViteServer({
     server: { middlewareMode: true },
-    appType: "spa",
+    appType: "custom", // Change to custom to handle multiple entry points manually if needed
   });
   app.use(vite.middlewares);
+  
+  app.get("/admin", async (req, res, next) => {
+    try {
+      const template = fs.readFileSync(path.resolve(process.cwd(), "admin.html"), "utf-8");
+      const html = await vite.transformIndexHtml(req.originalUrl, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  app.get("*", async (req, res, next) => {
+    try {
+      const template = fs.readFileSync(path.resolve(process.cwd(), "index.html"), "utf-8");
+      const html = await vite.transformIndexHtml(req.originalUrl, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    } catch (e) {
+      next(e);
+    }
+  });
 } else {
   // Static serving for production
   const distPath = path.resolve(process.cwd(), "dist");
   app.use(express.static(distPath));
+  
+  app.get("/admin", (req, res) => {
+    res.sendFile(path.resolve(distPath, "admin.html"));
+  });
+
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
