@@ -1,0 +1,11 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp .env $DEPLOYPATH || true
+    - cd $DEPLOYPATH
+    - /usr/local/bin/npm install
+    - /usr/local/bin/npm run build
+    - echo "Deployment finished successfully."
