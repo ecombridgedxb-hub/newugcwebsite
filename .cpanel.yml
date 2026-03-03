@@ -1,18 +1,27 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
-    
-    # 1. Install dependencies
-    - /usr/local/bin/npm install
-    
-    # 2. Build the project to generate the 'dist' folder
-    - /usr/local/bin/npm run build
-    
-    # 3. Deploy the 'dist' folder contents to public_html
-    # Using rsync to sync files and handle hidden files like .htaccess
-    # If rsync is not available, fallback to cp
-    - /usr/bin/rsync -avz --delete dist/ $DEPLOYPATH/ || /bin/cp -RT dist/ $DEPLOYPATH/
-    
-    # 4. Success log
-    - echo "Deployment to $DEPLOYPATH finished successfully."
+    - |
+      # 1. Define variables
+      DEPLOYPATH=/home/dorjfr0cmymf/public_html
+      echo "Starting deployment to $DEPLOYPATH"
+      
+      # 2. Install dependencies (using --production if possible to save memory)
+      npm install --no-audit --no-fund
+      
+      # 3. Build the project
+      # We use --no-typecheck if memory is an issue, but let's try standard first
+      npm run build
+      
+      # 4. Verify build exists
+      if [ ! -d "dist" ]; then
+        echo "Error: dist directory not found. Build failed."
+        exit 1
+      fi
+      
+      # 5. Sync files
+      # We use -a to preserve permissions and --delete to remove old files
+      rsync -avz --delete dist/ "$DEPLOYPATH/"
+      
+      # 6. Finalize
+      echo "Deployment to $DEPLOYPATH finished successfully at $(date)"
