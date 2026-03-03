@@ -114,9 +114,10 @@ app.post("/api/applications", upload.fields([
     });
 
     res.json({ success: true, message: "Application submitted successfully" });
-  } catch (error: any) {
-    console.error("Error processing application:", error);
-    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Error processing application:", err);
+    res.status(500).json({ success: false, message: err.message || "Internal server error" });
   }
 });
 
