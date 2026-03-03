@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curation Hub | UAE Creators</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1FAE9A',
+                        accent: '#E8F7F5',
+                        heading: '#0F172A',
+                        body: '#475569',
+                        bgMain: '#FFFFFF',
+                    },
+                    boxShadow: {
+                        soft: '0 20px 50px -12px rgba(15, 23, 42, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#F8FAFC] font-sans">
+    <div class="min-h-screen p-8 md:p-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                <div>
+                    <h1 class="text-4xl font-extrabold text-heading tracking-tight mb-2">Curation Hub</h1>
+                    <p class="text-body font-medium">Internal application management for UAE Creators.</p>
+                </div>
+                <div class="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100">
+                    <button class="filter-btn px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all bg-primary text-white shadow-lg shadow-primary/20" data-filter="pending">pending</button>
+                    <button class="filter-btn px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all text-body hover:bg-gray-50" data-filter="approved">approved</button>
+                    <button class="filter-btn px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all text-body hover:bg-gray-50" data-filter="rejected">rejected</button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Applications List -->
+                <div id="applications-list" class="lg:col-span-2 space-y-4">
+                    <!-- Applications will be injected here -->
+                </div>
+
+                <!-- Details Sidebar -->
+                <div id="details-sidebar" class="lg:col-span-1">
+                    <div class="bg-accent/10 rounded-[2.5rem] p-12 text-center border border-primary/10">
+                        <i data-lucide="shield" class="mx-auto text-primary mb-6" size="48"></i>
+                        <h4 class="font-bold text-heading text-xl mb-3">Compliance Ready</h4>
+                        <p class="text-body text-sm leading-relaxed font-medium">Select an application to verify credentials and manage access to the UAE Creators platform.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/admin.js"></script>
+</body>
+</html>

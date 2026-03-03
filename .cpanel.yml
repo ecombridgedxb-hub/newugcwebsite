@@ -1,0 +1,16 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
+    
+    # 1. Install dependencies securely in the background repository folder
+    - /usr/local/bin/npm install
+    
+    # 2. Build the project to generate the production-ready 'dist' folder
+    - /usr/local/bin/npm run build
+    
+    # 3. Copy ONLY the contents of the 'dist' folder into the live website folder
+    - /bin/cp -R dist/* $DEPLOYPATH/
+    
+    # 4. Success log
+    - echo "Deployment finished successfully."
