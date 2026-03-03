@@ -1,18 +1,23 @@
-# Ensure index.php is the default file
+# Ensure index.php is the default file and takes priority over index.html
 DirectoryIndex index.php index.html
 
 # Prevent directory listing
 Options -Indexes
 
-# Handle clean URLs if needed (optional)
+# Handle MIME types correctly
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+</IfModule>
+
+# Redirect index.html to index.php to clear old React artifacts
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Redirect index.html to index.php if it somehow still exists or is cached
+    # If index.html is requested, redirect to index.php
     RewriteRule ^index\.html$ /index.php [R=301,L]
     
-    # If the request is not for a real file or directory, you could redirect to index.php
-    # RewriteCond %{REQUEST_FILENAME} !-f
-    # RewriteCond %{REQUEST_FILENAME} !-d
-    # RewriteRule . index.php [L]
+    # If index.css is requested but missing, don't return HTML
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule \.css$ - [R=404,L]
 </IfModule>

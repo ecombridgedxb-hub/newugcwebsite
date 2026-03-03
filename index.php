@@ -11,8 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UAE Creators | Premium UGC Community</title>
     
-    <!-- Tailwind CSS CDN (Play CDN for development/cPanel) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS Play CDN (Optimized for development and simple production setups) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -24,6 +24,13 @@
                         heading: '#0F172A',
                         body: '#6B7280',
                         accent: '#D1FAE5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -15px rgba(0, 0, 0, 0.05)',
                     }
                 }
             }
