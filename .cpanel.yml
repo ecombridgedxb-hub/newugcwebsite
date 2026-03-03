@@ -3,21 +3,14 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
     
-    # 1. Clean up old React/Vite artifacts that cause conflicts
-    - /bin/rm -f $DEPLOYPATH/index.html
-    - /bin/rm -f $DEPLOYPATH/index.css
-    - /bin/rm -f $DEPLOYPATH/vite.svg
-    - /bin/rm -rf $DEPLOYPATH/src
-    - /bin/rm -rf $DEPLOYPATH/node_modules
-    - /bin/rm -rf $DEPLOYPATH/dist
+    # 1. Install dependencies
+    - /usr/local/bin/npm install
     
-    # 2. Copy the PHP application files and assets to the live website folder
-    - /bin/cp index.php $DEPLOYPATH/
-    - /bin/cp admin.php $DEPLOYPATH/
-    - /bin/cp .htaccess $DEPLOYPATH/
-    - /bin/cp -R php-components $DEPLOYPATH/
-    - /bin/cp -R assets $DEPLOYPATH/
-    - /bin/cp -R public/* $DEPLOYPATH/
+    # 2. Build the project to generate the 'dist' folder
+    - /usr/local/bin/npm run build
     
-    # 3. Success log
+    # 3. Copy the 'dist' contents to the live website folder
+    - /bin/cp -R dist/* $DEPLOYPATH/
+    
+    # 4. Success log
     - echo "Deployment finished successfully."
