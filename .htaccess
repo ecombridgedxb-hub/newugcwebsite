@@ -1,0 +1,18 @@
+# Ensure index.php is the default file
+DirectoryIndex index.php index.html
+
+# Prevent directory listing
+Options -Indexes
+
+# Handle clean URLs if needed (optional)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirect index.html to index.php if it somehow still exists or is cached
+    RewriteRule ^index\.html$ /index.php [R=301,L]
+    
+    # If the request is not for a real file or directory, you could redirect to index.php
+    # RewriteCond %{REQUEST_FILENAME} !-f
+    # RewriteCond %{REQUEST_FILENAME} !-d
+    # RewriteRule . index.php [L]
+</IfModule>

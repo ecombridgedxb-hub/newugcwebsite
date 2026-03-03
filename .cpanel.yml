@@ -3,12 +3,18 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
     
-    # 1. Copy the PHP application files and assets to the live website folder
+    # 1. Clean up old React artifacts that cause conflicts
+    - /bin/rm -f $DEPLOYPATH/index.html
+    - /bin/rm -f $DEPLOYPATH/index.css
+    - /bin/rm -rf $DEPLOYPATH/src
+    
+    # 2. Copy the PHP application files and assets to the live website folder
     - /bin/cp index.php $DEPLOYPATH/
     - /bin/cp admin.php $DEPLOYPATH/
+    - /bin/cp .htaccess $DEPLOYPATH/
     - /bin/cp -R php-components $DEPLOYPATH/
     - /bin/cp -R assets $DEPLOYPATH/
     - /bin/cp -R public/* $DEPLOYPATH/
     
-    # 2. Success log
+    # 3. Success log
     - echo "Deployment finished successfully."

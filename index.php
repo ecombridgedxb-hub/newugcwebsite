@@ -11,10 +11,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UAE Creators | Premium UGC Community</title>
     
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS CDN (Play CDN for development/cPanel) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1FAE9A',
+                        secondary: '#2FB7A3',
+                        bgMain: '#F9FAFB',
+                        heading: '#0F172A',
+                        body: '#6B7280',
+                        accent: '#D1FAE5',
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
@@ -36,23 +54,6 @@
         }
         [x-cloak] { display: none !important; }
     </style>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#1FAE9A',
-                        secondary: '#2FB7A3',
-                        bgMain: '#F9FAFB',
-                        heading: '#0F172A',
-                        body: '#6B7280',
-                        accent: '#D1FAE5',
-                    }
-                }
-            }
-        }
-    </script>
 </head>
 <body class="bg-[#F9FAFB] text-[#6B7280] overflow-x-hidden">
 
