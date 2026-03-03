@@ -9,8 +9,10 @@ deployment:
     # 2. Build the project to generate the 'dist' folder
     - /usr/local/bin/npm run build
     
-    # 3. Copy the 'dist' contents to the live website folder
-    - /bin/cp -R dist/* $DEPLOYPATH/
+    # 3. Deploy the 'dist' folder contents to public_html
+    # Using rsync to sync files and handle hidden files like .htaccess
+    # If rsync is not available, fallback to cp
+    - /usr/bin/rsync -avz --delete dist/ $DEPLOYPATH/ || /bin/cp -RT dist/ $DEPLOYPATH/
     
     # 4. Success log
-    - echo "Deployment finished successfully."
+    - echo "Deployment to $DEPLOYPATH finished successfully."

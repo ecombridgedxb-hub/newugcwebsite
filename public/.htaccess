@@ -1,0 +1,23 @@
+# React SPA Configuration
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # If the file or directory exists, serve it directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  
+  # Otherwise, send all requests to index.html for SPA routing
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Handle MIME types correctly
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType image/svg+xml .svg
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
