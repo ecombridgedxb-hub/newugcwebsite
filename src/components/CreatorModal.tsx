@@ -21,7 +21,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     email: '',
     phone: '',
     acceptsGifted: null as boolean | null,
-    
+
     hasLicense: '', // Yes, No, In Progress
     licenseFile: null as File | null,
     licenseFileName: '',
@@ -49,15 +49,15 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     onSiteAvailability: '',
     turnaroundTime: '',
     exclusivity: '',
-    
+
     agreed: false
   });
 
   if (!isOpen) return null;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && formData.acceptsGifted === false) {
-      setIsRejected(true);
+      await handleSubmit(true);
       return;
     }
     if (step < 6) setStep(step + 1);
@@ -67,58 +67,50 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isEarlyRejection = false) => {
     setIsSubmitting(true);
     setSubmitError('');
 
     try {
-      // Format the extensive formData into the simplified structure expected by Apps Script
-      const messageDetails = `
-        Age: ${formData.age}
-        Gender: ${formData.gender}
-        Emirate: ${formData.emirate}
-        Phone: ${formData.phone}
-        Accepts Gifted: ${formData.acceptsGifted ? 'Yes' : 'No'}
-        License Status: ${formData.hasLicense}
-        Portfolio: ${formData.portfolioLink}
-        Languages: ${formData.languages.join(', ')} ${formData.otherLanguage ? `(${formData.otherLanguage})` : ''}
-        Interests: ${formData.interests.join(', ')}
-        Consistency: ${formData.consistency}
-        Editing: ${formData.editing}
-        Equipment: ${formData.equipment}
-        On-Site: ${formData.onSiteAvailability}
-        TAT: ${formData.turnaroundTime}
-        Exclusivity: ${formData.exclusivity}
-      `;
-
-      // Determine which file to upload as the primary UGC verification (priority: License -> EID -> Visa)
-      let fileData = '';
-      let fileName = '';
-      let mimeType = '';
-
-      if (formData.licenseFileData) {
-        fileData = formData.licenseFileData;
-        fileName = formData.licenseFileName;
-        mimeType = formData.licenseMimeType;
-      } else if (formData.emiratesIdFileData) {
-        fileData = formData.emiratesIdFileData;
-        fileName = formData.emiratesIdFileName;
-        mimeType = formData.emiratesIdMimeType;
-      } else if (formData.visaFileData) {
-        fileData = formData.visaFileData;
-        fileName = formData.visaFileName;
-        mimeType = formData.visaMimeType;
-      }
-
       const payload = {
-        name: `${formData.firstName} ${formData.lastName}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        age: formData.age,
+        gender: formData.gender,
+        residence: formData.emirate,
         email: formData.email,
+        phone: formData.phone,
+        acceptsGifted: formData.acceptsGifted,
+        licenseStatus: formData.hasLicense,
         instagram: formData.socialHandles.instagram || '',
         tiktok: formData.socialHandles.tiktok || '',
-        message: messageDetails.trim(),
-        fileData,
-        fileName,
-        mimeType
+        youtube: formData.socialHandles.youtube || '',
+        facebook: formData.socialHandles.facebook || '',
+        x: formData.socialHandles.x || '',
+        pinterest: formData.socialHandles.pinterest || '',
+        snapchat: formData.socialHandles.snapchat || '',
+        portfolio: formData.portfolioLink,
+        languages: formData.languages.join(', ') + (formData.otherLanguage ? ` (${formData.otherLanguage})` : ''),
+        interests: formData.interests,
+        consistency: formData.consistency,
+        editing: formData.editing,
+        equipment: formData.equipment,
+        onSiteAvailability: formData.onSiteAvailability,
+        turnaroundTime: formData.turnaroundTime,
+        exclusivity: formData.exclusivity,
+        legalConsent: formData.agreed,
+
+        licenseFileData: formData.licenseFileData,
+        licenseFileName: formData.licenseFileName,
+        licenseMimeType: formData.licenseMimeType,
+
+        emiratesIdFileData: formData.emiratesIdFileData,
+        emiratesIdFileName: formData.emiratesIdFileName,
+        emiratesIdMimeType: formData.emiratesIdMimeType,
+
+        visaFileData: formData.visaFileData,
+        visaFileName: formData.visaFileName,
+        visaMimeType: formData.visaMimeType
       };
 
       const response = await fetch('https://script.google.com/macros/s/AKfycby5ukyApOHxMKw98Rf9EffPBlOk8kbW7HWpLz-SjNF7Ew6DkxxmpCf4x2R47G4Ra3SK/exec', {
@@ -130,7 +122,11 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
       const result = await response.json();
 
       if (result.status === 'success') {
-        setIsSubmitted(true);
+        if (isEarlyRejection) {
+          setIsRejected(true);
+        } else {
+          setIsSubmitted(true);
+        }
       } else {
         setSubmitError(result.message || 'An error occurred during submission.');
       }
@@ -138,18 +134,18 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
       console.error('Submission Error:', err);
       setSubmitError('Failed to connect to the server. Please check your internet connection and try again.');
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleFileChange = (field: 'licenseFile' | 'emiratesIdFile' | 'visaFile', e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFormData({ 
-          ...formData, 
+        setFormData({
+          ...formData,
           [field]: file,
           [`${field}Name`]: file.name,
           [`${field}Data`]: event.target?.result as string,
@@ -203,11 +199,11 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
         {type === 'success' ? 'Application Received' : 'Thank you for your interest'}
       </h3>
       <p className="text-[#6B7280] font-medium leading-relaxed mb-10 max-w-sm">
-        {type === 'success' 
+        {type === 'success'
           ? 'Thank you for your interest in joining the CuratedCircle. We will review your application and get back to you through your registered email.'
           : 'Thank you for your interest with CuratedCircle. If our business model changes, we will notify you for potential future onboarding.'}
       </p>
-      <button 
+      <button
         onClick={onClose}
         className="px-10 py-4 bg-[#0F172A] text-white font-bold rounded-2xl hover:scale-105 transition-all active:scale-95"
       >
@@ -239,7 +235,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
       <div onClick={onClose} className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-md"></div>
 
       <div className="relative bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden h-[90vh] flex flex-col">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-8 right-8 p-2 text-gray-400 hover:text-[#0F172A] transition-colors z-20"
         >
@@ -251,15 +247,15 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             <h3 className="text-2xl font-extrabold text-[#0F172A] mb-1 tracking-tight">Creator Registration</h3>
             <p className="text-[#6B7280] text-xs font-medium mb-6">Section {step}: {
               step === 1 ? 'Personal Information' :
-              step === 2 ? 'Licenses & Verification' :
-              step === 3 ? 'Social Media & Portfolio' :
-              step === 4 ? 'Content Expertise' :
-              step === 5 ? 'Collaboration & Logistics' : 'Final Verification'
+                step === 2 ? 'Licenses & Verification' :
+                  step === 3 ? 'Social Media & Portfolio' :
+                    step === 4 ? 'Content Expertise' :
+                      step === 5 ? 'Collaboration & Logistics' : 'Final Verification'
             }</p>
-            
+
             <div className="relative h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                className="absolute top-0 left-0 h-full bg-[#1FAE9A] transition-all duration-500" 
+              <div
+                className="absolute top-0 left-0 h-full bg-[#1FAE9A] transition-all duration-500"
                 style={{ width: `${(step / 6) * 100}%` }}
               ></div>
             </div>
@@ -271,18 +267,18 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">First Name</label>
-                    <input 
+                    <input
                       value={formData.firstName}
-                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                       placeholder="Jane"
                       className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none focus:bg-white focus:border-[#1FAE9A]/20 transition-all text-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Last Name</label>
-                    <input 
+                    <input
                       value={formData.lastName}
-                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                       placeholder="Doe"
                       className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none focus:bg-white focus:border-[#1FAE9A]/20 transition-all text-sm"
                     />
@@ -291,19 +287,19 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Age (18+)</label>
-                    <input 
+                    <input
                       type="number"
                       value={formData.age}
-                      onChange={(e) => setFormData({...formData, age: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                       placeholder="25"
                       className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none focus:bg-white text-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Gender</label>
-                    <select 
+                    <select
                       value={formData.gender}
-                      onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                       className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
                     >
                       <option value="">Select</option>
@@ -319,7 +315,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     {emirates.map(e => (
                       <button
                         key={e}
-                        onClick={() => setFormData({...formData, emirate: e})}
+                        onClick={() => setFormData({ ...formData, emirate: e })}
                         className={`p-2.5 text-[11px] font-bold rounded-xl border transition-all ${formData.emirate === e ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent hover:border-gray-200'}`}
                       >
                         {e}
@@ -329,19 +325,19 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Email Address</label>
-                  <input 
+                  <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="jane@example.com"
                     className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Phone / WhatsApp Number</label>
-                  <input 
+                  <input
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+971 50 000 0000"
                     className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
                   />
@@ -352,13 +348,13 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </p>
                   <div className="flex space-x-3">
                     <button
-                      onClick={() => setFormData({...formData, acceptsGifted: true})}
+                      onClick={() => setFormData({ ...formData, acceptsGifted: true })}
                       className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${formData.acceptsGifted === true ? 'bg-[#1FAE9A] text-white' : 'bg-white text-[#6B7280] border border-gray-200'}`}
                     >
                       Yes
                     </button>
                     <button
-                      onClick={() => setFormData({...formData, acceptsGifted: false})}
+                      onClick={() => setFormData({ ...formData, acceptsGifted: false })}
                       className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${formData.acceptsGifted === false ? 'bg-red-500 text-white' : 'bg-white text-[#6B7280] border border-gray-200'}`}
                     >
                       No
@@ -376,14 +372,14 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     {['Yes (NMCI/MCI)', 'No', 'In Progress'].map(opt => (
                       <button
                         key={opt}
-                        onClick={() => setFormData({...formData, hasLicense: opt})}
+                        onClick={() => setFormData({ ...formData, hasLicense: opt })}
                         className={`flex-1 py-2.5 text-[11px] font-bold rounded-xl border transition-all ${formData.hasLicense === opt ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
                       >
                         {opt}
                       </button>
                     ))}
                   </div>
-                  
+
                   {formData.hasLicense === 'Yes (NMCI/MCI)' && (
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Upload License Copy</label>
@@ -425,10 +421,10 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     {socialPlatforms.map(p => (
                       <div key={p.id} className="space-y-1">
                         <div className="text-[10px] font-bold text-[#6B7280] ml-1">{p.name}</div>
-                        <input 
+                        <input
                           value={formData.socialHandles[p.id] || ''}
                           onChange={(e) => setFormData({
-                            ...formData, 
+                            ...formData,
                             socialHandles: { ...formData.socialHandles, [p.id]: e.target.value }
                           })}
                           placeholder="Link or @handle"
@@ -440,9 +436,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Portfolio / Media Kit Link</label>
-                  <input 
+                  <input
                     value={formData.portfolioLink}
-                    onChange={(e) => setFormData({...formData, portfolioLink: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, portfolioLink: e.target.value })}
                     placeholder="Link to Canva, Drive, or Website"
                     className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
                   />
@@ -461,9 +457,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     ))}
                   </div>
                   {formData.languages.includes('Other') && (
-                    <input 
+                    <input
                       value={formData.otherLanguage}
-                      onChange={(e) => setFormData({...formData, otherLanguage: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, otherLanguage: e.target.value })}
                       placeholder="Specify language"
                       className="w-full mt-3 p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
                     />
@@ -478,8 +474,8 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Top 3 Interest Fields (Select up to 3)</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      'Beauty & Skincare', 'Fitness & Wellness', 'Tech & Gaming', 
-                      'Fashion', 'Food & Beverage', 'Parenting/Kids', 
+                      'Beauty & Skincare', 'Fitness & Wellness', 'Tech & Gaming',
+                      'Fashion', 'Food & Beverage', 'Parenting/Kids',
                       'Travel', 'Home & Lifestyle', 'Sports', 'Cozy Hobbies'
                     ].map(field => (
                       <button
@@ -498,7 +494,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     {['Multiple times a week', 'Once a week', 'Once a month'].map(opt => (
                       <button
                         key={opt}
-                        onClick={() => setFormData({...formData, consistency: opt})}
+                        onClick={() => setFormData({ ...formData, consistency: opt })}
                         className={`w-full p-3.5 text-sm font-bold rounded-xl border transition-all text-left ${formData.consistency === opt ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
                       >
                         {opt}
@@ -515,7 +511,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     ].map(opt => (
                       <button
                         key={opt.id}
-                        onClick={() => setFormData({...formData, editing: opt.label})}
+                        onClick={() => setFormData({ ...formData, editing: opt.label })}
                         className={`w-full p-3.5 text-sm font-bold rounded-xl border transition-all text-left ${formData.editing === opt.label ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
                       >
                         {opt.label}
@@ -525,9 +521,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Primary Equipment used for filming</label>
-                  <input 
+                  <input
                     value={formData.equipment}
-                    onChange={(e) => setFormData({...formData, equipment: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
                     placeholder="e.g., iPhone 15 Pro, Sony ZV-1"
                     className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
                   />
@@ -544,7 +540,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     {['Yes', 'No'].map(opt => (
                       <button
                         key={opt}
-                        onClick={() => setFormData({...formData, onSiteAvailability: opt})}
+                        onClick={() => setFormData({ ...formData, onSiteAvailability: opt })}
                         className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all ${formData.onSiteAvailability === opt ? 'bg-[#0F172A] text-white' : 'bg-[#F9FAFB] text-[#6B7280]'}`}
                       >
                         {opt}
@@ -559,7 +555,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     {['48 Hours', '3–5 Days', '6-7 Days'].map(opt => (
                       <button
                         key={opt}
-                        onClick={() => setFormData({...formData, turnaroundTime: opt})}
+                        onClick={() => setFormData({ ...formData, turnaroundTime: opt })}
                         className={`py-3.5 rounded-xl font-bold text-[11px] transition-all ${formData.turnaroundTime === opt ? 'bg-[#0F172A] text-white' : 'bg-[#F9FAFB] text-[#6B7280]'}`}
                       >
                         {opt}
@@ -570,9 +566,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Current Exclusivity</label>
                   <p className="text-[10px] text-[#6B7280] mb-3">Are you currently an exclusive ambassador for any specific brand? (If yes, please list):</p>
-                  <textarea 
+                  <textarea
                     value={formData.exclusivity}
-                    onChange={(e) => setFormData({...formData, exclusivity: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, exclusivity: e.target.value })}
                     placeholder="List brands or leave empty"
                     className="w-full p-4 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm min-h-[100px] resize-none"
                   />
@@ -588,11 +584,11 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </div>
                   <h4 className="text-xl font-extrabold text-[#0F172A] mb-4">Final Verification</h4>
                   <label className="flex items-start space-x-4 cursor-pointer text-left">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={formData.agreed}
-                      onChange={(e) => setFormData({...formData, agreed: e.target.checked})}
-                      className="mt-1 w-5 h-5 accent-[#1FAE9A] rounded-md" 
+                      onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
+                      className="mt-1 w-5 h-5 accent-[#1FAE9A] rounded-md"
                     />
                     <span className="text-xs font-bold text-[#0F172A] leading-relaxed">
                       I confirm that all information provided is accurate, and I am legally allowed to work in the UAE.
@@ -602,18 +598,19 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-[10px] text-[#6B7280] text-center px-6 leading-relaxed">
                   Most sites focus on immediate sign-in and deal with the details later. We review applications manually to ensure the highest quality for our brand partners.
                 </p>
-                {submitError && (
-                  <div className="p-4 bg-red-50 text-red-600 font-medium text-sm rounded-xl text-center border border-red-100">
-                    {submitError}
-                  </div>
-                )}
+              </div>
+            )}
+
+            {submitError && (
+              <div className="mt-4 p-4 bg-red-50 text-red-600 font-medium text-sm rounded-xl text-center border border-red-100">
+                {submitError}
               </div>
             )}
           </div>
 
           <div className="p-10 pt-0 flex space-x-4">
             {step > 1 && (
-              <button 
+              <button
                 onClick={handlePrev}
                 className="flex items-center justify-center w-14 h-14 bg-gray-100 text-[#0F172A] rounded-2xl hover:bg-gray-200 transition-colors active:scale-95"
               >
@@ -621,17 +618,29 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
               </button>
             )}
             {step < 6 ? (
-              <button 
+              <button
                 onClick={handleNext}
-                disabled={step === 1 && formData.acceptsGifted === null}
-                className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] ${step === 1 && formData.acceptsGifted === null ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#0F172A] text-white hover:bg-[#1FAE9A]'}`}
+                disabled={(step === 1 && formData.acceptsGifted === null) || isSubmitting}
+                className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] ${(step === 1 && formData.acceptsGifted === null) || isSubmitting ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#0F172A] text-white hover:bg-[#1FAE9A]'}`}
               >
-                <span>Next Step</span>
-                <ChevronRight style={{ width: 18, height: 18 }} />
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Next Step</span>
+                    <ChevronRight style={{ width: 18, height: 18 }} />
+                  </>
+                )}
               </button>
             ) : (
-              <button 
-                onClick={handleSubmit}
+              <button
+                onClick={() => handleSubmit(false)}
                 disabled={!formData.agreed || isSubmitting}
                 className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] shadow-xl ${(!formData.agreed || isSubmitting) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#1FAE9A] text-white shadow-[#1FAE9A]/20'}`}
               >
