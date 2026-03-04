@@ -1,7 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
-    - /bin/cp -rf dist/* $DEPLOYPATH/
-    - /bin/cp -f dist/index.html $DEPLOYPATH/index.html
-    - /bin/chmod 644 $DEPLOYPATH/index.html
+    - /bin/cp -rf dist/* /home/dorjfr0cmymf/public_html/
+    - /bin/cp -f dist/index.html /home/dorjfr0cmymf/public_html/index.html
+    - /bin/chmod 644 /home/dorjfr0cmymf/public_html/index.html
