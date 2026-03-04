@@ -10,6 +10,8 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isRejected, setIsRejected] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -23,10 +25,16 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     hasLicense: '', // Yes, No, In Progress
     licenseFile: null as File | null,
     licenseFileName: '',
+    licenseFileData: '', // base64
+    licenseMimeType: '',
     emiratesIdFile: null as File | null,
     emiratesIdFileName: '',
+    emiratesIdFileData: '', // base64
+    emiratesIdMimeType: '',
     visaFile: null as File | null,
     visaFileName: '',
+    visaFileData: '', // base64
+    visaMimeType: '',
 
     socialHandles: {} as Record<string, string>,
     portfolioLink: '',
@@ -59,19 +67,96 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    console.log('Submitting:', formData);
-    setIsSubmitted(true);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      // Format the extensive formData into the simplified structure expected by Apps Script
+      const messageDetails = `
+        Age: ${formData.age}
+        Gender: ${formData.gender}
+        Emirate: ${formData.emirate}
+        Phone: ${formData.phone}
+        Accepts Gifted: ${formData.acceptsGifted ? 'Yes' : 'No'}
+        License Status: ${formData.hasLicense}
+        Portfolio: ${formData.portfolioLink}
+        Languages: ${formData.languages.join(', ')} ${formData.otherLanguage ? `(${formData.otherLanguage})` : ''}
+        Interests: ${formData.interests.join(', ')}
+        Consistency: ${formData.consistency}
+        Editing: ${formData.editing}
+        Equipment: ${formData.equipment}
+        On-Site: ${formData.onSiteAvailability}
+        TAT: ${formData.turnaroundTime}
+        Exclusivity: ${formData.exclusivity}
+      `;
+
+      // Determine which file to upload as the primary UGC verification (priority: License -> EID -> Visa)
+      let fileData = '';
+      let fileName = '';
+      let mimeType = '';
+
+      if (formData.licenseFileData) {
+        fileData = formData.licenseFileData;
+        fileName = formData.licenseFileName;
+        mimeType = formData.licenseMimeType;
+      } else if (formData.emiratesIdFileData) {
+        fileData = formData.emiratesIdFileData;
+        fileName = formData.emiratesIdFileName;
+        mimeType = formData.emiratesIdMimeType;
+      } else if (formData.visaFileData) {
+        fileData = formData.visaFileData;
+        fileName = formData.visaFileName;
+        mimeType = formData.visaMimeType;
+      }
+
+      const payload = {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        instagram: formData.socialHandles.instagram || '',
+        tiktok: formData.socialHandles.tiktok || '',
+        message: messageDetails.trim(),
+        fileData,
+        fileName,
+        mimeType
+      };
+
+      const response = await fetch('https://script.google.com/macros/s/AKfycby5ukyApOHxMKw98Rf9EffPBlOk8kbW7HWpLz-SjNF7Ew6DkxxmpCf4x2R47G4Ra3SK/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Necessary for Apps Script CORS
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        setIsSubmitted(true);
+      } else {
+        setSubmitError(result.message || 'An error occurred during submission.');
+      }
+    } catch (err) {
+      console.error('Submission Error:', err);
+      setSubmitError('Failed to connect to the server. Please check your internet connection and try again.');
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (field: 'licenseFile' | 'emiratesIdFile' | 'visaFile', e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setFormData({ 
-        ...formData, 
-        [field]: file,
-        [`${field}Name`]: file.name 
-      });
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFormData({ 
+          ...formData, 
+          [field]: file,
+          [`${field}Name`]: file.name,
+          [`${field}Data`]: event.target?.result as string,
+          [`${field}MimeType`]: file.type
+        });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -517,6 +602,11 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-[10px] text-[#6B7280] text-center px-6 leading-relaxed">
                   Most sites focus on immediate sign-in and deal with the details later. We review applications manually to ensure the highest quality for our brand partners.
                 </p>
+                {submitError && (
+                  <div className="p-4 bg-red-50 text-red-600 font-medium text-sm rounded-xl text-center border border-red-100">
+                    {submitError}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -542,10 +632,20 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             ) : (
               <button 
                 onClick={handleSubmit}
-                disabled={!formData.agreed}
-                className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] shadow-xl ${!formData.agreed ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#1FAE9A] text-white shadow-[#1FAE9A]/20'}`}
+                disabled={!formData.agreed || isSubmitting}
+                className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] shadow-xl ${(!formData.agreed || isSubmitting) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#1FAE9A] text-white shadow-[#1FAE9A]/20'}`}
               >
-                Submit Application
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <span>Submit Application</span>
+                )}
               </button>
             )}
           </div>
