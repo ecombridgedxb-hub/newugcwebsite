@@ -1,27 +1,7 @@
 ---
 deployment:
   tasks:
-    - |
-      # 1. Define variables
-      DEPLOYPATH=/home/dorjfr0cmymf/public_html
-      echo "Starting deployment to $DEPLOYPATH"
-      
-      # 2. Install dependencies (using --production if possible to save memory)
-      npm install --no-audit --no-fund
-      
-      # 3. Build the project
-      # We use --no-typecheck if memory is an issue, but let's try standard first
-      npm run build
-      
-      # 4. Verify build exists
-      if [ ! -d "dist" ]; then
-        echo "Error: dist directory not found. Build failed."
-        exit 1
-      fi
-      
-      # 5. Sync files
-      # We use -a to preserve permissions and --delete to remove old files
-      rsync -avz --delete dist/ "$DEPLOYPATH/"
-      
-      # 6. Finalize
-      echo "Deployment to $DEPLOYPATH finished successfully at $(date)"
+    - export DEPLOYPATH=/home/dorjfr0cmymf/public_html
+    - /bin/cp -rf dist/* $DEPLOYPATH/
+    - /bin/cp -f dist/index.html $DEPLOYPATH/index.html
+    - /bin/chmod 644 $DEPLOYPATH/index.html
