@@ -1,6 +1,7 @@
 ---
 deployment:
   tasks:
+    - /bin/rm -rf /home/dorjfr0cmymf/public_html/assets
     - /bin/cp -a dist/. /home/dorjfr0cmymf/public_html/
     - /bin/cp -f dist/index.html /home/dorjfr0cmymf/public_html/index.html
     - /bin/chmod 644 /home/dorjfr0cmymf/public_html/index.html
