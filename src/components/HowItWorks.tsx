@@ -33,10 +33,6 @@ const HowItWorks: React.FC = () => {
             </div>
           ))}
         </div>
-
-        <button className="px-8 py-3 border-2 border-[#1FAE9A] text-[#1FAE9A] font-bold text-sm rounded-lg hover:bg-[#1FAE9A]/5 transition-all">
-          Learn More &rarr;
-        </button>
       </div>
     </section>
   );

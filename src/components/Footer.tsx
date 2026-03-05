@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenModal, onOpenPrivacy }) => {
             </ul>
           </div>
 
-          <div>
+          <div id="contact">
             <h4 className="font-bold text-xs mb-8 text-[#0F172A] uppercase tracking-[0.25em]">Connect</h4>
             <div className="text-[#6B7280] text-sm font-medium leading-relaxed">
               Dubai, United Arab Emirates<br />

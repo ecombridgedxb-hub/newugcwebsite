@@ -16,7 +16,7 @@ const ValueProp: React.FC = () => {
     {
       icon: <Sparkles className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
       title: "Creative Freedom",
-      desc: "No scripts, no templates. Your voice, your style"
+      desc: "Your voice, your style."
     },
     {
       icon: <Heart className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
