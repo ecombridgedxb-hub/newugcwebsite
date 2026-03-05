@@ -1,68 +1,62 @@
 import React from 'react';
-import { ShieldCheck, Sparkles, Heart } from 'lucide-react';
+import { ShieldCheck, Package, Sparkles, Heart, Star, CheckCircle2 } from 'lucide-react';
 
 const ValueProp: React.FC = () => {
-  return (
-    <section id="creators" className="py-32 bg-[#F9FAFB] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid md:grid-cols-2 gap-24 items-center">
-          
-          <div className="order-2 md:order-1">
-            <h2 className="text-4xl lg:text-6xl font-extrabold text-[#0F172A] mb-8 tracking-tight leading-tight">
-              Curated for creators with <span className="text-[#1FAE9A] italic">vision.</span>
-            </h2>
-            <p className="text-lg text-[#6B7280] mb-12 leading-relaxed font-medium">
-              We focus on premium quality. Our platform connects you with high-end brands that value your unique perspective and aesthetic authenticity.
-            </p>
-            <div className="space-y-10">
-              <div className="flex items-start space-x-6 group">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
-                  <ShieldCheck className="text-[#1FAE9A]" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#0F172A] text-xl mb-2">Secure Ecosystem</h4>
-                  <p className="text-[#6B7280] text-sm font-medium leading-relaxed">Transparent contracts and verified payments for every collaboration.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-6 group">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
-                  <Sparkles className="text-[#1FAE9A]" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#0F172A] text-xl mb-2">Premium Access</h4>
-                  <p className="text-[#6B7280] text-sm font-medium leading-relaxed">Unlock exclusive opportunities with the UAE's top luxury and lifestyle brands.</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-6 group">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
-                  <Heart className="text-[#1FAE9A]" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#0F172A] text-xl mb-2">Community Driven</h4>
-                  <p className="text-[#6B7280] text-sm font-medium leading-relaxed">A supportive network designed to help you scale your creative influence.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+  const cards = [
+    {
+      icon: <ShieldCheck className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
+      title: "Curated Brands",
+      desc: "We only partner with quality D2C brands in health, wellness, and lifestyle"
+    },
+    {
+      icon: <Package className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
+      title: "Product-Based",
+      desc: "Receive products you will love. Create content on your terms"
+    },
+    {
+      icon: <Sparkles className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
+      title: "Creative Freedom",
+      desc: "No scripts, no templates. Your voice, your style"
+    },
+    {
+      icon: <Heart className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
+      title: "UAE-Focused",
+      desc: "Built for the UAE creator community by operators who understand the market"
+    },
+    {
+      icon: <Star className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
+      title: "Quality > Quantity",
+      desc: "We review every creator manually. No mass invites"
+    },
+    {
+      icon: <CheckCircle2 className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
+      title: "Transparent Process",
+      desc: "Clear expectations. No hidden requirements. Honest collaboration"
+    }
+  ];
 
-          <div className="order-1 md:order-2 grid grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="rounded-[3rem] overflow-hidden shadow-soft h-72 bg-gray-100">
-                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=600" alt="UGC Creator" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" referrerPolicy="no-referrer" />
+  return (
+    <section id="creators" className="py-24 bg-[#F9FAFB]">
+      <div className="max-w-6xl mx-auto px-6 lg:px-12">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-[#0F172A] mb-4 tracking-tight">
+            What Makes Us Different
+          </h2>
+          <p className="text-[#6B7280] font-medium text-lg">
+            Quality over quantity. Authenticity over algorithms.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cards.map((card, i) => (
+            <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-transparent hover:border-gray-100 hover:shadow-md transition-all">
+              <div className="w-10 h-10 bg-[#D1FAE5] rounded-xl flex items-center justify-center mb-6">
+                {card.icon}
               </div>
-              <div className="rounded-[3rem] overflow-hidden shadow-soft h-56 bg-gray-100">
-                <img src="https://images.unsplash.com/photo-1606103836293-0a063ee20566?auto=format&fit=crop&q=80&w=600" alt="UGC Creator" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" referrerPolicy="no-referrer" />
-              </div>
+              <h3 className="font-bold text-[#0F172A] mb-3 text-lg">{card.title}</h3>
+              <p className="text-[#6B7280] text-sm leading-relaxed">{card.desc}</p>
             </div>
-            <div className="pt-16 space-y-6">
-              <div className="rounded-[3rem] overflow-hidden shadow-soft h-56 bg-gray-100">
-                <img src="https://images.unsplash.com/photo-1516245834210-c4c142787335?auto=format&fit=crop&q=80&w=600" alt="UGC Creator" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" referrerPolicy="no-referrer" />
-              </div>
-              <div className="rounded-[3rem] overflow-hidden shadow-soft h-72 bg-gray-100">
-                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=600" alt="UGC Creator" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" referrerPolicy="no-referrer" />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
