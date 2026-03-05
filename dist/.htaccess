@@ -21,3 +21,23 @@
 
 # Prevent directory listing
 Options -Indexes
+
+# Cache Control Best Practices
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # HTML files should not be cached (always revalidate)
+    <FilesMatch "\.(html|htm)$">
+        FileETag None
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </FilesMatch>
+
+    # Static assets (Vite hashes JS/CSS etc automatically) can be cached long-term
+    <FilesMatch "\.(js|css|webp|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|ico)$">
+        ExpiresDefault "access plus 1 year"
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
