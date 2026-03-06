@@ -11,6 +11,7 @@ import CreatorModal from './components/CreatorModal';
 import PrivacyModal from './components/PrivacyModal';
 import TermsModal from './components/TermsModal';
 import ContactModal from './components/ContactModal';
+import FloatingWhatsApp from './components/FloatingWhatsApp';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,6 +59,8 @@ function App() {
         isOpen={isContactOpen}
         onClose={() => setIsContactOpen(false)}
       />
+
+      <FloatingWhatsApp />
     </div>
   );
 }
