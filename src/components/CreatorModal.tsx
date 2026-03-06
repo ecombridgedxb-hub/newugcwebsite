@@ -287,7 +287,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
               <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">First Name</label>
+                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">First Name *</label>
                     <input
                       required
                       value={formData.firstName}
@@ -297,7 +297,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Last Name</label>
+                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Last Name *</label>
                     <input
                       required
                       value={formData.lastName}
@@ -309,7 +309,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Age (18+)</label>
+                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Age (18+) *</label>
                     <input
                       required
                       type="number"
@@ -321,7 +321,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Gender</label>
+                    <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Gender *</label>
                     <select
                       required
                       value={formData.gender}
@@ -336,7 +336,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Primary Residence (Emirate)</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Primary Residence (Emirate) *</label>
                   <select
                     required
                     value={formData.emirate}
@@ -350,7 +350,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Email Address</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Email Address *</label>
                   <input
                     required
                     type="email"
@@ -361,7 +361,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Phone / WhatsApp Number</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Phone / WhatsApp Number *</label>
                   <input
                     required
                     value={formData.phone}
@@ -372,7 +372,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-gray-100">
                   <p className="text-[11px] font-bold text-[#0F172A] mb-3 leading-relaxed">
-                    We focus on UGC influencers that accept GIFTED COLLABORATIONS (products as payment) only. Do you operate within this agreement?
+                    We focus on UGC influencers that accept GIFTED COLLABORATIONS (products as payment) only. Do you operate within this agreement? *
                   </p>
                   <div className="flex space-x-3">
                     <button
@@ -397,7 +397,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             {step === 2 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">UAE Content Creator/Media License</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">UAE Content Creator/Media License *</label>
                   <div className="flex space-x-2 mb-4">
                     {['Yes (NMCI/MCI)', 'No', 'In Progress'].map(opt => (
                       <button
@@ -424,9 +424,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
 
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Emirates ID / Passport Copy</label>
+                      <label className="block text-[10px] font-bold text-[#6B7280] uppercase tracking-widest mb-2">Emirates ID / Passport Copy *</label>
                       <div className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all ${formData.emiratesIdFileName ? 'bg-[#D1FAE5]/10 border-[#1FAE9A]' : 'bg-[#F9FAFB] border-gray-200'}`}>
-                        <input type="file" onChange={(e) => handleFileChange('emiratesIdFile', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                        <input type="file" required={!formData.emiratesIdFileName} onChange={(e) => handleFileChange('emiratesIdFile', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                         <Upload className={formData.emiratesIdFileName ? 'text-[#1FAE9A]' : 'text-gray-400'} style={{ width: 24, height: 24, marginBottom: 8 }} />
                         <span className="text-[11px] font-bold text-[#0F172A]">{formData.emiratesIdFileName || 'Upload Emirates ID / Passport'}</span>
                       </div>
@@ -447,7 +447,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             {step === 3 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Social Media Platforms</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Social Media Platforms * (Select at least 1)</label>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {socialPlatforms.map(p => {
                       const isActive = formData.activeSocialPlatforms.includes(p.id);
@@ -472,7 +472,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                         if (!platform) return null;
                         return (
                           <div key={activeId} className="flex flex-col space-y-1">
-                            <label className="text-[10px] font-bold text-[#0F172A] ml-1 uppercase">{platform.name} Handle / Link</label>
+                            <label className="text-[10px] font-bold text-[#0F172A] ml-1 uppercase">{platform.name} Handle / Link *</label>
                             <input
                               required
                               value={formData.socialHandles[activeId] || ''}
@@ -499,7 +499,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Primary Content Language(s)</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Primary Content Language(s) * (Select at least 1)</label>
                   <div className="grid grid-cols-2 gap-2">
                     {['English', 'Arabic', 'Both', 'Other'].map(l => (
                       <button
@@ -527,7 +527,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             {step === 4 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Top 3 Interest Fields (Select up to 3)</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Top Interest Fields * (Select exactly 3)</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       'Beauty & Skincare', 'Cozy Hobbies', 'Fashion', 'Fitness & Wellness',
@@ -546,7 +546,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Consistency in Creating Content</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Consistency in Creating Content *</label>
                   <div className="space-y-2">
                     {['Multiple times a week', 'Once a week', 'Once a month'].map(opt => (
                       <button
@@ -561,7 +561,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Editing Capabilities</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Editing Capabilities *</label>
                   <div className="space-y-2">
                     {[
                       { id: 'self', label: 'I edit my own videos (CapCut, etc.)' },
@@ -593,7 +593,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             {step === 5 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Availability for On-Site Shoots</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Availability for On-Site Shoots *</label>
                   <p className="text-[10px] text-[#6B7280] mb-3">Are you available to film at malls, studios, or events in the UAE?</p>
                   <div className="flex space-x-3">
                     {['Yes', 'No'].map(opt => (
@@ -609,7 +609,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Standard Turnaround Time (TAT)</label>
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Standard Turnaround Time (TAT) *</label>
                   <p className="text-[10px] text-[#6B7280] mb-3">How many days from receiving a product do you typically need to deliver the first draft?</p>
                   <div className="grid grid-cols-3 gap-2">
                     {['48 Hours', '3–5 Days', '6-7 Days'].map(opt => (
@@ -683,8 +683,23 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={(step === 1 && formData.acceptsGifted === null) || isSubmitting}
-                className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] ${(step === 1 && formData.acceptsGifted === null) || isSubmitting ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#0F172A] text-white hover:bg-[#1FAE9A]'}`}
+                disabled={
+                  (step === 1 && formData.acceptsGifted === null) ||
+                  (step === 2 && (!formData.hasLicense || (formData.hasLicense === 'Yes (NMCI/MCI)' && !formData.licenseFileName) || !formData.emiratesIdFileName)) ||
+                  (step === 3 && (formData.activeSocialPlatforms.length === 0 || formData.languages.length === 0)) ||
+                  (step === 4 && (formData.interests.length < 3 || !formData.consistency || !formData.editing)) ||
+                  (step === 5 && (!formData.onSiteAvailability || !formData.turnaroundTime)) ||
+                  isSubmitting
+                }
+                className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] ${((step === 1 && formData.acceptsGifted === null) ||
+                    (step === 2 && (!formData.hasLicense || (formData.hasLicense === 'Yes (NMCI/MCI)' && !formData.licenseFileName) || !formData.emiratesIdFileName)) ||
+                    (step === 3 && (formData.activeSocialPlatforms.length === 0 || formData.languages.length === 0)) ||
+                    (step === 4 && (formData.interests.length < 3 || !formData.consistency || !formData.editing)) ||
+                    (step === 5 && (!formData.onSiteAvailability || !formData.turnaroundTime)) ||
+                    isSubmitting)
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#0F172A] text-white hover:bg-[#1FAE9A]'
+                  }`}
               >
                 {isSubmitting ? (
                   <>
