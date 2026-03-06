@@ -3,9 +3,11 @@ import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   onOpenModal: () => void;
+  onOpenTerms: () => void;
+  onOpenContact: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenModal }) => {
+const Navbar: React.FC<NavbarProps> = ({ onOpenModal, onOpenTerms, onOpenContact }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -38,8 +40,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenModal }) => {
           <div className="hidden md:flex items-center space-x-10">
             <a href="#" className="text-sm font-bold text-[#1FAE9A] transition-colors">Home</a>
             <a href="#how-it-works" className="text-sm font-semibold text-[#6B7280] hover:text-[#0F172A] transition-colors">How It Works</a>
-            <a href="#terms" className="text-sm font-semibold text-[#6B7280] hover:text-[#0F172A] transition-colors">Terms</a>
-            <a href="#contact" className="text-sm font-semibold text-[#6B7280] hover:text-[#0F172A] transition-colors">Contact</a>
+            <button onClick={onOpenTerms} className="text-sm font-semibold text-[#6B7280] hover:text-[#0F172A] transition-colors">Terms</button>
+            <button onClick={onOpenContact} className="text-sm font-semibold text-[#6B7280] hover:text-[#0F172A] transition-colors">Contact</button>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -64,9 +66,9 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenModal }) => {
 
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white fixed inset-x-0 top-[72px] h-screen shadow-2xl p-8 flex flex-col space-y-6">
-          <a href="#creators" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold text-[#0F172A]">Creators</a>
           <a href="#how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold text-[#0F172A]">How it Works</a>
-          <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-bold text-[#0F172A]">Pricing</a>
+          <button onClick={() => { onOpenTerms(); setIsMobileMenuOpen(false); }} className="text-xl font-bold text-[#0F172A] text-left">Terms</button>
+          <button onClick={() => { onOpenContact(); setIsMobileMenuOpen(false); }} className="text-xl font-bold text-[#0F172A] text-left">Contact</button>
           <div className="pt-6">
             <button
               onClick={() => { onOpenModal(); setIsMobileMenuOpen(false); }}

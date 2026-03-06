@@ -6,7 +6,7 @@ const ValueProp: React.FC = () => {
     {
       icon: <ShieldCheck className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
       title: "Curated Brands",
-      desc: "We only partner with quality D2C brands in health, wellness, and lifestyle"
+      desc: "We partner with curated and onboarded D2C brands in health, wellness, and lifestyle"
     },
     {
       icon: <Package className="text-[#1FAE9A]" style={{ width: 18, height: 18 }} />,
@@ -36,7 +36,7 @@ const ValueProp: React.FC = () => {
   ];
 
   return (
-    <section id="creators" className="py-24 bg-[#F9FAFB]">
+    <section id="creators" className="py-16 bg-[#F9FAFB]">
       <div className="max-w-6xl mx-auto px-6 lg:px-12">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-extrabold text-[#0F172A] mb-4 tracking-tight">

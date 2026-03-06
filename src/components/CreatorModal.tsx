@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { X, Upload, ChevronLeft, ChevronRight, CheckCircle2, Instagram, Youtube, Facebook, Twitter, Share2 } from 'lucide-react';
 
 interface CreatorModalProps {
   isOpen: boolean;
@@ -37,6 +37,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     visaMimeType: '',
 
     socialHandles: {} as Record<string, string>,
+    activeSocialPlatforms: [] as string[],
     portfolioLink: '',
     languages: [] as string[],
     otherLanguage: '',
@@ -56,6 +57,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleNext = async () => {
+    const form = document.getElementById('creator-form') as HTMLFormElement | null;
+    if (form && !form.reportValidity()) return;
+
     if (step === 1 && formData.acceptsGifted === false) {
       await handleSubmit(true);
       return;
@@ -68,6 +72,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async (isEarlyRejection = false) => {
+    const form = document.getElementById('creator-form') as HTMLFormElement | null;
+    if (!isEarlyRejection && form && !form.reportValidity()) return;
+
     setIsSubmitting(true);
     setSubmitError('');
 
@@ -115,7 +122,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
 
       const response = await fetch('https://script.google.com/macros/s/AKfycby5ukyApOHxMKw98Rf9EffPBlOk8kbW7HWpLz-SjNF7Ew6DkxxmpCf4x2R47G4Ra3SK/exec', {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Necessary for Apps Script CORS
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
 
@@ -174,14 +181,27 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const toggleSocialPlatform = (platformId: string) => {
+    const current = [...formData.activeSocialPlatforms];
+    if (current.includes(platformId)) {
+      setFormData({
+        ...formData,
+        activeSocialPlatforms: current.filter(p => p !== platformId),
+        socialHandles: { ...formData.socialHandles, [platformId]: '' }
+      });
+    } else {
+      setFormData({ ...formData, activeSocialPlatforms: [...current, platformId] });
+    }
+  };
+
   const socialPlatforms = [
-    { id: 'instagram', name: 'Instagram' },
-    { id: 'tiktok', name: 'TikTok' },
-    { id: 'youtube', name: 'YouTube' },
-    { id: 'facebook', name: 'Facebook' },
-    { id: 'x', name: 'X (Twitter)' },
-    { id: 'pinterest', name: 'Pinterest' },
-    { id: 'snapchat', name: 'Snapchat' }
+    { id: 'instagram', name: 'Instagram', icon: <Instagram style={{ width: 14, height: 14 }} /> },
+    { id: 'tiktok', name: 'TikTok', icon: <Share2 style={{ width: 14, height: 14 }} /> },
+    { id: 'youtube', name: 'YouTube', icon: <Youtube style={{ width: 14, height: 14 }} /> },
+    { id: 'facebook', name: 'Facebook', icon: <Facebook style={{ width: 14, height: 14 }} /> },
+    { id: 'x', name: 'X', icon: <Twitter style={{ width: 14, height: 14 }} /> },
+    { id: 'pinterest', name: 'Pinterest', icon: <Share2 style={{ width: 14, height: 14 }} /> },
+    { id: 'snapchat', name: 'Snapchat', icon: <Share2 style={{ width: 14, height: 14 }} /> }
   ];
 
   const emirates = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
@@ -237,12 +257,13 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
       <div className="relative bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden h-[90vh] flex flex-col">
         <button
           onClick={onClose}
+          type="button"
           className="absolute top-8 right-8 p-2 text-gray-400 hover:text-[#0F172A] transition-colors z-20"
         >
           <X style={{ width: 24, height: 24 }} />
         </button>
 
-        <div className="flex flex-col h-full">
+        <form id="creator-form" onSubmit={(e) => e.preventDefault()} className="flex flex-col h-full">
           <div className="p-10 pb-4">
             <h3 className="text-2xl font-extrabold text-[#0F172A] mb-1 tracking-tight">Creator Registration</h3>
             <p className="text-[#6B7280] text-xs font-medium mb-6">Section {step}: {
@@ -268,6 +289,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">First Name</label>
                     <input
+                      required
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                       placeholder="Jane"
@@ -277,6 +299,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Last Name</label>
                     <input
+                      required
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                       placeholder="Doe"
@@ -288,7 +311,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Age (18+)</label>
                     <input
+                      required
                       type="number"
+                      min="18"
                       value={formData.age}
                       onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                       placeholder="25"
@@ -298,6 +323,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div>
                     <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Gender</label>
                     <select
+                      required
                       value={formData.gender}
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                       className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm"
@@ -311,21 +337,22 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Primary Residence (Emirate)</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <select
+                    required
+                    value={formData.emirate}
+                    onChange={(e) => setFormData({ ...formData, emirate: e.target.value })}
+                    className="w-full p-3.5 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-sm focus:bg-white focus:border-[#1FAE9A]/20 transition-all font-bold text-[#6B7280]"
+                  >
+                    <option value="" disabled>Select Emirate</option>
                     {emirates.map(e => (
-                      <button
-                        key={e}
-                        onClick={() => setFormData({ ...formData, emirate: e })}
-                        className={`p-2.5 text-[11px] font-bold rounded-xl border transition-all ${formData.emirate === e ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent hover:border-gray-200'}`}
-                      >
-                        {e}
-                      </button>
+                      <option key={e} value={e} className="font-bold text-[#0F172A]">{e}</option>
                     ))}
-                  </div>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Email Address</label>
                   <input
+                    required
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -336,6 +363,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Phone / WhatsApp Number</label>
                   <input
+                    required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+971 50 000 0000"
@@ -348,12 +376,14 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   </p>
                   <div className="flex space-x-3">
                     <button
+                      type="button"
                       onClick={() => setFormData({ ...formData, acceptsGifted: true })}
                       className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${formData.acceptsGifted === true ? 'bg-[#1FAE9A] text-white' : 'bg-white text-[#6B7280] border border-gray-200'}`}
                     >
                       Yes
                     </button>
                     <button
+                      type="button"
                       onClick={() => setFormData({ ...formData, acceptsGifted: false })}
                       className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${formData.acceptsGifted === false ? 'bg-red-500 text-white' : 'bg-white text-[#6B7280] border border-gray-200'}`}
                     >
@@ -371,6 +401,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div className="flex space-x-2 mb-4">
                     {['Yes (NMCI/MCI)', 'No', 'In Progress'].map(opt => (
                       <button
+                        type="button"
                         key={opt}
                         onClick={() => setFormData({ ...formData, hasLicense: opt })}
                         className={`flex-1 py-2.5 text-[11px] font-bold rounded-xl border transition-all ${formData.hasLicense === opt ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
@@ -416,23 +447,47 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             {step === 3 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Social Media Handles</label>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    {socialPlatforms.map(p => (
-                      <div key={p.id} className="space-y-1">
-                        <div className="text-[10px] font-bold text-[#6B7280] ml-1">{p.name}</div>
-                        <input
-                          value={formData.socialHandles[p.id] || ''}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            socialHandles: { ...formData.socialHandles, [p.id]: e.target.value }
-                          })}
-                          placeholder="Link or @handle"
-                          className="w-full p-3 bg-[#F9FAFB] border border-transparent rounded-xl outline-none text-xs focus:bg-white focus:border-[#1FAE9A]/20"
-                        />
-                      </div>
-                    ))}
+                  <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Social Media Platforms</label>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {socialPlatforms.map(p => {
+                      const isActive = formData.activeSocialPlatforms.includes(p.id);
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => toggleSocialPlatform(p.id)}
+                          className={`flex items-center space-x-2 px-4 py-2 text-xs font-bold rounded-xl border transition-all ${isActive ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent hover:border-gray-200'}`}
+                        >
+                          {p.icon}
+                          <span>{p.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {formData.activeSocialPlatforms.length > 0 && (
+                    <div className="space-y-3 mt-4 p-5 bg-[#F9FAFB] rounded-2xl border border-gray-100">
+                      {formData.activeSocialPlatforms.map(activeId => {
+                        const platform = socialPlatforms.find(p => p.id === activeId);
+                        if (!platform) return null;
+                        return (
+                          <div key={activeId} className="flex flex-col space-y-1">
+                            <label className="text-[10px] font-bold text-[#0F172A] ml-1 uppercase">{platform.name} Handle / Link</label>
+                            <input
+                              required
+                              value={formData.socialHandles[activeId] || ''}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                socialHandles: { ...formData.socialHandles, [activeId]: e.target.value }
+                              })}
+                              placeholder={`@handle or link...`}
+                              className="w-full p-3 bg-white border border-transparent rounded-xl outline-none text-sm focus:border-[#1FAE9A]/20 transition-all font-bold text-[#6B7280]"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-2">Portfolio / Media Kit Link</label>
@@ -448,6 +503,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div className="grid grid-cols-2 gap-2">
                     {['English', 'Arabic', 'Both', 'Other'].map(l => (
                       <button
+                        type="button"
                         key={l}
                         onClick={() => toggleLanguage(l)}
                         className={`p-3 text-xs font-bold rounded-xl border transition-all ${formData.languages.includes(l) ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
@@ -474,11 +530,12 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <label className="block text-[10px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Top 3 Interest Fields (Select up to 3)</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      'Beauty & Skincare', 'Fitness & Wellness', 'Tech & Gaming',
-                      'Fashion', 'Food & Beverage', 'Parenting/Kids',
-                      'Travel', 'Home & Lifestyle', 'Sports', 'Cozy Hobbies'
+                      'Beauty & Skincare', 'Cozy Hobbies', 'Fashion', 'Fitness & Wellness',
+                      'Food & Beverage', 'Healthy Food', 'Home & Lifestyle',
+                      'Parenting/Kids', 'Sports', 'Travel'
                     ].map(field => (
                       <button
+                        type="button"
                         key={field}
                         onClick={() => toggleInterest(field)}
                         className={`p-3 text-[10px] font-bold rounded-xl border transition-all text-left ${formData.interests.includes(field) ? 'bg-[#1FAE9A] text-white border-[#1FAE9A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
@@ -493,6 +550,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div className="space-y-2">
                     {['Multiple times a week', 'Once a week', 'Once a month'].map(opt => (
                       <button
+                        type="button"
                         key={opt}
                         onClick={() => setFormData({ ...formData, consistency: opt })}
                         className={`w-full p-3.5 text-sm font-bold rounded-xl border transition-all text-left ${formData.consistency === opt ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
@@ -510,6 +568,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                       { id: 'raw', label: 'I provide raw footage only' }
                     ].map(opt => (
                       <button
+                        type="button"
                         key={opt.id}
                         onClick={() => setFormData({ ...formData, editing: opt.label })}
                         className={`w-full p-3.5 text-sm font-bold rounded-xl border transition-all text-left ${formData.editing === opt.label ? 'bg-[#0F172A] text-white border-[#0F172A]' : 'bg-[#F9FAFB] text-[#6B7280] border-transparent'}`}
@@ -539,6 +598,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div className="flex space-x-3">
                     {['Yes', 'No'].map(opt => (
                       <button
+                        type="button"
                         key={opt}
                         onClick={() => setFormData({ ...formData, onSiteAvailability: opt })}
                         className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all ${formData.onSiteAvailability === opt ? 'bg-[#0F172A] text-white' : 'bg-[#F9FAFB] text-[#6B7280]'}`}
@@ -554,6 +614,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
                   <div className="grid grid-cols-3 gap-2">
                     {['48 Hours', '3–5 Days', '6-7 Days'].map(opt => (
                       <button
+                        type="button"
                         key={opt}
                         onClick={() => setFormData({ ...formData, turnaroundTime: opt })}
                         className={`py-3.5 rounded-xl font-bold text-[11px] transition-all ${formData.turnaroundTime === opt ? 'bg-[#0F172A] text-white' : 'bg-[#F9FAFB] text-[#6B7280]'}`}
@@ -611,6 +672,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
           <div className="p-10 pt-0 flex space-x-4">
             {step > 1 && (
               <button
+                type="button"
                 onClick={handlePrev}
                 className="flex items-center justify-center w-14 h-14 bg-gray-100 text-[#0F172A] rounded-2xl hover:bg-gray-200 transition-colors active:scale-95"
               >
@@ -619,6 +681,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
             )}
             {step < 6 ? (
               <button
+                type="button"
                 onClick={handleNext}
                 disabled={(step === 1 && formData.acceptsGifted === null) || isSubmitting}
                 className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] ${(step === 1 && formData.acceptsGifted === null) || isSubmitting ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#0F172A] text-white hover:bg-[#1FAE9A]'}`}
@@ -640,6 +703,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
               </button>
             ) : (
               <button
+                type="button"
                 onClick={() => handleSubmit(false)}
                 disabled={!formData.agreed || isSubmitting}
                 className={`flex-1 font-bold py-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98] shadow-xl ${(!formData.agreed || isSubmitting) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#1FAE9A] text-white shadow-[#1FAE9A]/20'}`}
@@ -658,7 +722,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ isOpen, onClose }) => {
               </button>
             )}
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

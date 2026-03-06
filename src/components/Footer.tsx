@@ -3,9 +3,11 @@ import { Instagram, Linkedin } from 'lucide-react';
 interface FooterProps {
   onOpenModal: () => void;
   onOpenPrivacy: () => void;
+  onOpenTerms: () => void;
+  onOpenContact: () => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onOpenModal, onOpenPrivacy }) => {
+const Footer: React.FC<FooterProps> = ({ onOpenModal, onOpenPrivacy, onOpenTerms, onOpenContact }) => {
   return (
     <footer className="bg-white border-t border-gray-100 pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -42,8 +44,8 @@ const Footer: React.FC<FooterProps> = ({ onOpenModal, onOpenPrivacy }) => {
             <h4 className="font-bold text-xs mb-8 text-[#0F172A] uppercase tracking-[0.25em]">Ecosystem</h4>
             <ul className="space-y-5 text-sm font-medium">
               <li><button onClick={onOpenPrivacy} className="text-[#6B7280] hover:text-[#1FAE9A] transition-colors">Privacy Policy</button></li>
-              <li><a href="#" className="text-[#6B7280] hover:text-[#1FAE9A] transition-colors">Membership Terms</a></li>
-              <li><a href="#" className="text-[#6B7280] hover:text-[#1FAE9A] transition-colors">Guidelines</a></li>
+              <li><button onClick={onOpenTerms} className="text-[#6B7280] hover:text-[#1FAE9A] transition-colors">Membership Terms</button></li>
+              <li><button onClick={onOpenContact} className="text-[#6B7280] hover:text-[#1FAE9A] transition-colors">Contact Us</button></li>
             </ul>
           </div>
 
@@ -51,7 +53,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenModal, onOpenPrivacy }) => {
             <h4 className="font-bold text-xs mb-8 text-[#0F172A] uppercase tracking-[0.25em]">Connect</h4>
             <div className="text-[#6B7280] text-sm font-medium leading-relaxed">
               Dubai, United Arab Emirates<br />
-              <span className="mt-4 block font-bold text-[#0F172A]">hello@curatedcircle.co</span>
+              <button onClick={onOpenContact} className="mt-4 block font-bold text-[#0F172A] hover:underline">hello@curatedcircle.co</button>
               <span className="mt-1 block font-bold text-[#0F172A]">+971 50 328 9387</span>
             </div>
           </div>
